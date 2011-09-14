@@ -86,7 +86,7 @@ void element_response_hba(double freq, double az, double el,
 //     freq_center + freq_range].
 // az: Azimuth in rad in the range [0.0, 2.0 * pi].
 // el: Elevation in rad in the range [0.0, pi / 2.0].
-// freq_range, freq_center: Frequency center and rangein Hz, should be > 0.
+// freq_range, freq_center: Frequency center and range in Hz, should be > 0.
 // coeff_shape: Shape of the coefficient array, all dimensions should be > 0.
 //
 // NB: Clipping directions below the horizon (el < 0.0) is the responsibility of
