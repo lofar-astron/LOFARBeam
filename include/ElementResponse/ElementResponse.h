@@ -37,61 +37,59 @@ namespace LOFAR
 // @{
 
 // Compute the response of an idealized LOFAR LBA dual dipole antenna to
-// radiation at frequency freq (Hz) arriving from the direction given by
-// az, el (rad). The +X dipole is at azimuth 0.0, the +Y dipole is at azimuth
-// pi / 2.0.
+// radiation at frequency freq (Hz) arriving from the direction given by theta,
+// phi (rad). The antenna model is described in a spherical coordinate system
+// with coordinates theta (zenith angle) and phi (azimith). The +X dipole is at
+// azimuth zero, the +Y dipole is at azimuth PI / 2.0.
 //
 // Preconditions:
 // --------------
 // freq: Frequency in Hz in the range [10 MHz, 100 MHz].
-// az: Azimuth in rad in the range [0.0, 2.0 * pi].
-// el: Elevation in rad in the range [0.0, pi / 2.0].
+// theta: Zenith angle in rad in the range [0.0, PI / 2.0].
+// phi: Azimuth in rad in the range [0.0, 2.0 * PI].
 //
-// NB: Clipping directions below the horizon (el < 0.0) is the responsibility of
-// the caller.
-void element_response_lba(double freq, double az, double el,
+void element_response_lba(double freq, double theta, double phi,
     std::complex<double> (&response)[2][2]);
 
 // Compute the response of an idealized LOFAR HBA dual dipole antenna to
-// radiation at frequency freq (Hz) arriving from the direction given by
-// az, el (rad). The +X dipole is at azimuth 0.0, the +Y dipole is at azimuth
-// pi / 2.0.
+// radiation at frequency freq (Hz) arriving from the direction given by theta,
+// phi (rad). The antenna model is described in a spherical coordinate system
+// with coordinates theta (zenith angle) and phi (azimith). The +X dipole is at
+// azimuth zero, the +Y dipole is at azimuth PI / 2.0.
 //
 // Preconditions:
 // --------------
 // freq: Frequency in Hz in the range [120 MHz, 240 MHz].
-// az: Azimuth in rad in the range [0.0, 2.0 * pi].
-// el: Elevation in rad in the range [0.0, pi / 2.0].
+// theta: Zenith angle in rad in the range [0.0, PI / 2.0].
+// phi: Azimuth in rad in the range [0.0, 2.0 * PI].
 //
-// NB: Clipping directions below the horizon (el < 0.0) is the responsibility of
-// the caller.
-void element_response_hba(double freq, double az, double el,
+void element_response_hba(double freq, double theta, double phi,
     std::complex<double> (&response)[2][2]);
 
 // Compute the response of an idealized LOFAR dual dipole antenna to radiation
-// at frequency freq (Hz) arriving from the direction given by az, el (rad).
-// The +X dipole is at azimuth 0.0, the +Y dipole is at azimuth pi / 2.0.
+// at frequency freq (Hz) arriving from the direction given by theta, phi (rad).
+// The antenna model is described in a spherical coordinate system with
+// coordinates theta (zenith angle) and phi (azimith). The +X dipole is at
+// azimuth zero, the +Y dipole is at azimuth PI / 2.0.
 //
 // This function uses a set of user defined coefficients to evaluate the beam
 // model. The coeff_shape parameter defines the shape of the coefficient array
 // as no. of harmonics x degree in theta x degree in frequency x 2. The last
 // dimension is implicit and always equal to 2. The coeff parameter points to an
-// array of coefficients of the proper size, stored in row-major order (or "C"-
-// order). The freq_center and freq_range parameters define the frequency range
-// covered by the model described by the set of coefficients.
+// array of coefficients of the proper size, stored in row-major order
+// ("C"-order). The freq_center and freq_range parameters define the frequency
+// range covered by the model described by the set of coefficients.
 //
 // Preconditions:
 // --------------
 // freq: Frequency in Hz in the range [freq_center - freq_range,
 //     freq_center + freq_range].
-// az: Azimuth in rad in the range [0.0, 2.0 * pi].
-// el: Elevation in rad in the range [0.0, pi / 2.0].
+// theta: Zenith angle in rad in the range [0.0, PI / 2.0].
+// phi: Azimuth in rad in the range [0.0, 2.0 * PI].
 // freq_range, freq_center: Frequency center and range in Hz, should be > 0.
 // coeff_shape: Shape of the coefficient array, all dimensions should be > 0.
 //
-// NB: Clipping directions below the horizon (el < 0.0) is the responsibility of
-// the caller.
-void element_response(double freq, double az, double el,
+void element_response(double freq, double theta, double phi,
     std::complex<double> (&response)[2][2], double freq_center,
     double freq_range, const unsigned int (&coeff_shape)[3],
     const std::complex<double> coeff[]);

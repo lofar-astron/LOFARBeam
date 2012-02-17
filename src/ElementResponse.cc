@@ -39,42 +39,44 @@ const double pi_2 = 1.570796326794896619231322;
 namespace LOFAR
 {
 
-void element_response_lba(double freq, double az, double el,
+void element_response_lba(double freq, double theta, double phi,
     std::complex<double> (&response)[2][2])
 {
-    element_response(freq, az, el, response, default_lba_freq_center,
+    element_response(freq, theta, phi, response, default_lba_freq_center,
         default_lba_freq_range, default_lba_coeff_shape, default_lba_coeff);
 }
 
-void element_response_hba(double freq, double az, double el,
+void element_response_hba(double freq, double theta, double phi,
     std::complex<double> (&response)[2][2])
 {
-    element_response(freq, az, el, response, default_hba_freq_center,
+    element_response(freq, theta, phi, response, default_hba_freq_center,
         default_hba_freq_range, default_hba_coeff_shape, default_hba_coeff);
 }
 
-void element_response(double freq, double az, double el,
+void element_response(double freq, double theta, double phi,
     std::complex<double> (&response)[2][2], double freq_center,
     double freq_range, const unsigned int (&coeff_shape)[3],
     const std::complex<double> coeff[])
 {
-    const unsigned int nHarmonics  = coeff_shape[0];
-    const unsigned int nPowerTheta = coeff_shape[1];
-    const unsigned int nPowerFreq  = coeff_shape[2];
-
-    // The model is parameterized in terms of zenith angle. The appropriate
-    // conversion is taken care of below.
-    const double theta = pi_2 - el;
-
-    // The model is parameterized in terms of a normalized frequency in the
-    // range [-1, 1]. The appropriate conversion is taken care of below.
-    freq = (freq - freq_center) / freq_range;
-
     // Initialize the response to zero.
     response[0][0] = 0.0;
     response[0][1] = 0.0;
     response[1][0] = 0.0;
     response[1][1] = 0.0;
+
+    // Clip directions below the horizon.
+    if(theta >= pi_2)
+    {
+        return;
+    }
+
+    const unsigned int nHarmonics  = coeff_shape[0];
+    const unsigned int nPowerTheta = coeff_shape[1];
+    const unsigned int nPowerFreq  = coeff_shape[2];
+
+    // The model is parameterized in terms of a normalized frequency in the
+    // range [-1, 1]. The appropriate conversion is taken care of below.
+    freq = (freq - freq_center) / freq_range;
 
     // The variables sign and kappa are used to compute the value of kappa
     // mentioned in the description of the beam model [kappa = (-1)^k * (2 * k
@@ -137,7 +139,7 @@ void element_response(double freq, double az, double el,
 
         // Compute the Jones matrix for the current harmonic, by rotating P over
         // kappa * az, and add it to the result.
-        const double angle = sign * kappa * az;
+        const double angle = sign * kappa * phi;
         const double caz = std::cos(angle);
         const double saz = std::sin(angle);
 
