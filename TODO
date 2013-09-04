@@ -1,0 +1,63 @@
+* Importance of ITRF epoch ("target date") recorded in comments of AntennaField
+  files? Is this coordinate system different from CASA measures?
+
+* Store station BF weights into MS?
+
+* How to deal (later) with time dependence? Seems best to compute ITRF
+  directions internally in that case, but this can be expensive.
+    => Seems anyway better to compute ITRF directions internally, to achieve
+           sky coordinates in -> sky coordinates out.
+
+    matrix22c_t response(const casa::MEpoch &epoch,
+        const casa::MDirection &target, const casa::MDirection &reference,
+        real_t freq, real_t freq0) const;
+
+* (Talk with Martijn) Phase reference direction could be part of Station / Tile state.
+  This would simplify the interface considerably, but it also introduces new problems:
+    => In the naive implementation, conversion of J2000 to ITRF would happen for
+       each station and antenna field (tile) separately. This is wasted work, because
+       the ITRF direction should be the same for all stations (modulo abberation due
+       to the Sun etc.)
+
+    => This introduces the notion of time into the interface, which is anyway needed
+       if we want to deal with antenna elements that fail during an observation.
+       However, it also means that for the "target" direction you need to choose
+       between specifying it in J2000 or ITRF. ITRF is tricky, because in the end
+       the target is a direction on the sky which implies a certain ITRF direction
+       at time t. If you decouple these in the interface, you could input a time
+       and an ITRF direction which is incorrect for that time given the target
+       direction on the sky. However, if you couple the two and compute the ITRF
+       direction on the fly, this leads to wasted work in the naive implementation.
+
+        => BUT: Consider also near objects (different ITRF coordinates per station)
+           and constant ITRF directions (zenith, although that also varies per
+           station)?
+
+    => How to deal with freq0? Does this also become state of the station BF? If so,
+       we need a separate instance per sub band or switch freq0 for each sub band.
+
+* Time of failure: If it can be assumed failed antennae remain switched off for
+  the remainder of the observation, best would be to keep a time of failure for
+  each antenna? This gives O(1) lookup at a reasonable space requirement.
+
+
+  matrix22c_t response( real_t time, const ITRFDirection &direction,
+        real_t freq, real_t freq0 ) const;
+    => vector3r_t ITRFDirection::operator()(real_t time // ,
+        const vector3r_t &position)??
+
+* MEpoch peculiarities:
+    => MJD seems to be assumed implicitly?
+    => A constant number of seconds per day is used when converting seconds to
+       days, yet for UTC (and others?) the number of seconds per day varies.
+
+* Use PhasedArrayStationLBA/HBA to avoid useless "computation" of the array
+  factor of an LBA antenna element (always 1.0) is impossible in combination
+  with the use of function templates for (output) iterators, because C++ does
+  not allow virtual function templates.
+
+* Determine whether coordinates (offsets) in AntennaField files are in ITRF or
+  Station coordinates, by looking at the normal vector. Also check iHBADeltas.
+
+* Polarization vectors in J2000 or JAPP, i.e. what does conversion of J2000 ->
+  ITRF do, and what should it do?

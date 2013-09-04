@@ -1,0 +1,5 @@
+// \ingroup Calibration
+
+// \defgroup StationResponse StationResponse
+// The StationResponse package contains functions to evaluate the array factor
+// and the station response of a LOFAR station.
