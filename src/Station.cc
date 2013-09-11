@@ -45,6 +45,16 @@ const vector3r_t &Station::position() const
     return itsPosition;
 }
 
+void Station::setPhaseReference(const vector3r_t &reference)
+{
+    itsPhaseReference = reference;
+}
+
+const vector3r_t &Station::phaseReference() const
+{
+    return itsPhaseReference;
+}
+
 void Station::addAntennaField(const AntennaField::Ptr &field)
 {
     itsFields.push_back(field);

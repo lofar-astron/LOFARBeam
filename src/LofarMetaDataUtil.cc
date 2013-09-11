@@ -35,6 +35,7 @@
 #include <measures/Measures/MCPosition.h>
 #include <measures/Measures/MeasTable.h>
 #include <measures/Measures/MeasConvert.h>
+#include <measures/TableMeasures/ScalarMeasColumn.h>
 
 #include <ms/MeasurementSets/MSAntenna.h>
 #include <ms/MeasurementSets/MSAntennaParse.h>
@@ -58,10 +59,10 @@ namespace StationResponse
 
 using namespace casa;
 
-//bool hasColumn(const Table &table, const string &column)
-//{
-//    return table.tableDesc().isColumn(column);
-//}
+bool hasColumn(const Table &table, const string &column)
+{
+    return table.tableDesc().isColumn(column);
+}
 
 bool hasSubTable(const Table &table, const string &name)
 {
@@ -188,33 +189,47 @@ AntennaField::Ptr readAntennaField(const Table &table, unsigned int id)
     return field;
 }
 
+void readStationPhaseReference(const Table &table, unsigned int id,
+    const Station::Ptr &station)
+{
+    const string columnName("LOFAR_PHASE_REFERENCE");
+    if(hasColumn(table, columnName))
+    {
+        ROScalarMeasColumn<MPosition> c_reference(table, columnName);
+        MPosition mReference = MPosition::Convert(c_reference(id),
+            MPosition::ITRF)();
+        MVPosition mvReference = mReference.getValue();
+        vector3r_t reference = {{mvReference(0), mvReference(1),
+            mvReference(2)}};
+
+        station->setPhaseReference(reference);
+    }
+}
+
 Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
 {
     ROMSAntennaColumns antenna(ms.antenna());
 
-    // Get ITRF position.
+    // Get station name.
+    const string name(antenna.name()(id));
+
+    // Get station position (ITRF).
     MPosition mPosition = MPosition::Convert(antenna.positionMeas()(id),
         MPosition::ITRF)();
     MVPosition mvPosition = mPosition.getValue();
-    vector3r_t position = {{mvPosition(0), mvPosition(1), mvPosition(2)}};
+    const vector3r_t position = {{mvPosition(0), mvPosition(1), mvPosition(2)}};
 
     // Create station.
-    Station::Ptr station(new Station(antenna.name()(id), position));
+    Station::Ptr station(new Station(name, position));
 
-    // Read antenna field information for each field of this station.
+    // Read phase reference position (if available).
+    readStationPhaseReference(ms.antenna(), id, station);
+
+    // Read antenna field information.
     Table tab_field = getSubTable(ms, "LOFAR_ANTENNA_FIELD");
     tab_field = tab_field(tab_field.col("ANTENNA_ID") == static_cast<Int>(id));
 
-    const size_t nFields = tab_field.nrow();
-
-//    if(nFields == 0)
-//    {
-////        LOG_WARN_STR("Antenna " << name << " has no associated antenna fields."
-////          " Beamforming simulation will be switched off for this antenna.");
-//        return Station::Ptr(new Station(name, position));
-//    }
-
-    for(size_t i = 0; i < nFields; ++i)
+    for(size_t i = 0; i < tab_field.nrow(); ++i)
     {
         station->addAntennaField(readAntennaField(tab_field, i));
     }

@@ -51,7 +51,7 @@ raw_array_factor_t TileAntenna::rawArrayFactor(real_t freq,
 
     complex_t af(0.0, 0.0);
     for(TileConfig::const_iterator element_it = itsConfig.begin(),
-        element_end = itsConfig.end(); element_it != element_end; ++element_end)
+        element_end = itsConfig.end(); element_it != element_end; ++element_it)
     {
         // Compute the effective delay for a plane wave approaching from the
         // direction of interest with respect to the position of element i

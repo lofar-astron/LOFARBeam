@@ -51,10 +51,12 @@ public:
     const string &name() const;
     const vector3r_t &position() const;
 
+    void setPhaseReference(const vector3r_t &reference);
+    const vector3r_t &phaseReference() const;
+
     void addAntennaField(const AntennaField::Ptr &field);
     FieldList::const_iterator beginFields() const;
     FieldList::const_iterator endFields() const;
-
 
     /**
      *  \brief Compute the response of the station for a plane wave of frequency
@@ -151,6 +153,7 @@ private:
 private:
     string      itsName;
     vector3r_t  itsPosition;
+    vector3r_t  itsPhaseReference;
     FieldList   itsFields;
 };
 
