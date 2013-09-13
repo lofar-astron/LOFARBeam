@@ -71,7 +71,7 @@ Station::FieldList::const_iterator Station::endFields() const
 }
 
 matrix22c_t Station::response(real_t time, real_t freq,
-    const vector3r_t &direction, real_t freq0, const vector3r_t direction0,
+    const vector3r_t &direction, real_t freq0, const vector3r_t &station0,
     const vector3r_t &tile0) const
 {
     raw_response_t result = {{{{{}}, {{}}}}, {{}}};
@@ -79,7 +79,7 @@ matrix22c_t Station::response(real_t time, real_t freq,
         field_end = endFields(); field_it != field_end; ++field_it)
     {
         raw_array_factor_t field = fieldArrayFactor(*field_it, time, freq,
-            direction, freq0, phaseReference(), direction0);
+            direction, freq0, phaseReference(), station0);
 
         raw_response_t antenna = (*field_it)->rawResponse(time, freq,
             direction, tile0);
@@ -99,7 +99,7 @@ matrix22c_t Station::response(real_t time, real_t freq,
 }
 
 diag22c_t Station::arrayFactor(real_t time, real_t freq,
-    const vector3r_t &direction, real_t freq0, const vector3r_t direction0,
+    const vector3r_t &direction, real_t freq0, const vector3r_t &station0,
     const vector3r_t &tile0) const
 {
     raw_array_factor_t af = {{{}}, {{}}};
@@ -107,7 +107,7 @@ diag22c_t Station::arrayFactor(real_t time, real_t freq,
         field_end = endFields(); field_it != field_end; ++field_it)
     {
         raw_array_factor_t field = fieldArrayFactor(*field_it, time, freq,
-            direction, freq0, phaseReference(), direction0);
+            direction, freq0, phaseReference(), station0);
 
         raw_array_factor_t antenna = (*field_it)->rawArrayFactor(time, freq,
             direction, tile0);
