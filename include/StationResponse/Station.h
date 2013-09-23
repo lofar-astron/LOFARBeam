@@ -154,8 +154,7 @@ public:
      *  \param freq0 %Station beam former reference frequency (Hz).
      *  \param station0 %Station beam former reference direction (ITRF, m).
      *  \param tile0 Tile beam former reference direction (ITRF, m).
-     *  \return A diagonal matrix with the array factor the the X and Y
-     *  antennae.
+     *  \return A diagonal matrix with the array factor of the X and Y antennae.
      *
      *  For any given sub-band, the %LOFAR station beam former computes weights
      *  for a single reference frequency. Usually, this reference frequency is
