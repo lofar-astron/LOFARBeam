@@ -112,7 +112,8 @@ public:
 
     AntennaField(const string &name, const CoordinateSystem &coordinates)
         :   itsName(name),
-            itsCoordinateSystem(coordinates)
+            itsCoordinateSystem(coordinates),
+            itsNCPCacheTime(-1)
     {
         vector3r_t ncp = {{0.0, 0.0, 1.0}};
         itsNCP.reset(new ITRFDirection(position(), ncp));
