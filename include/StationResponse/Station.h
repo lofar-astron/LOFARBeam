@@ -44,9 +44,9 @@ namespace StationResponse
 class Station
 {
 public:
-    typedef shared_ptr<Station>         Ptr;
-    typedef shared_ptr<const Station>   ConstPtr;
-    typedef vector<AntennaField::Ptr>   FieldList;
+    typedef shared_ptr<Station>             Ptr;
+    typedef shared_ptr<const Station>       ConstPtr;
+    typedef vector<AntennaField::ConstPtr>  FieldList;
 
     /*!
      *  \brief Construct a new Station instance.
@@ -95,7 +95,7 @@ public:
      *
      *  Use this method to add the appropriate antenna fields to the station.
      */
-    void addAntennaField(const AntennaField::Ptr &field);
+    void addAntennaField(const AntennaField::ConstPtr &field);
 
     /*!
      *  \brief Return an iterator that points to the beginning of the list of
