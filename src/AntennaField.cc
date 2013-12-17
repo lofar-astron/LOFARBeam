@@ -130,7 +130,7 @@ raw_response_t AntennaField::rawResponse(real_t time, real_t freq,
     raw_array_factor_t af = rawArrayFactor(time, freq, direction, direction0);
 
     raw_response_t result;
-    result.response = singleElementResponse(time, freq, direction);
+    result.response = elementResponse(time, freq, direction);
     result.response[0][0] *= af.factor[0];
     result.response[0][1] *= af.factor[0];
     result.response[1][0] *= af.factor[1];

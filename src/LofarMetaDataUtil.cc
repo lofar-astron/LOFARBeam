@@ -231,7 +231,7 @@ Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
 
     for(size_t i = 0; i < tab_field.nrow(); ++i)
     {
-        station->addAntennaField(readAntennaField(tab_field, i));
+        station->addField(readAntennaField(tab_field, i));
     }
 
     return station;

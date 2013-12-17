@@ -65,7 +65,7 @@ raw_array_factor_t TileAntenna::rawArrayFactor(real_t freq,
     return result;
 }
 
-matrix22c_t TileAntenna::singleElementResponse(real_t freq,
+matrix22c_t TileAntenna::elementResponse(real_t freq,
     const vector3r_t &direction) const
 {
     // The positive X dipole direction is SW of the reference orientation,

@@ -43,7 +43,7 @@ raw_array_factor_t AntennaFieldLBA::rawArrayFactor(real_t, real_t,
     return af;
 }
 
-matrix22c_t AntennaFieldLBA::singleElementResponse(real_t time, real_t freq,
+matrix22c_t AntennaFieldLBA::elementResponse(real_t time, real_t freq,
     const vector3r_t &direction) const
 {
     return itsAntennaModel->response(freq, itrf2station(direction))

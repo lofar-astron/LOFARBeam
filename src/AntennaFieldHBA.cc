@@ -66,10 +66,10 @@ raw_array_factor_t AntennaFieldHBA::rawArrayFactor(real_t, real_t freq,
         itrf2station(direction0));
 }
 
-matrix22c_t AntennaFieldHBA::singleElementResponse(real_t time, real_t freq,
+matrix22c_t AntennaFieldHBA::elementResponse(real_t time, real_t freq,
     const vector3r_t &direction) const
 {
-    return itsAntennaModel->singleElementResponse(freq, itrf2station(direction))
+    return itsAntennaModel->elementResponse(freq, itrf2station(direction))
         * rotation(time, direction);
 }
 
