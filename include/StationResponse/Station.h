@@ -98,6 +98,16 @@ public:
     void addAntennaField(const AntennaField::ConstPtr &field);
 
     /*!
+     *  \brief Return the number of available antenna fields.
+     */
+    size_t nFields() const;
+
+    /*!
+     *  \brief Return the requested antenna field.
+     */
+    AntennaField::ConstPtr field(size_t i) const;
+
+    /*!
      *  \brief Return an iterator that points to the beginning of the list of
      *  antenna fields.
      */

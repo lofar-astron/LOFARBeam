@@ -61,6 +61,16 @@ void Station::addAntennaField(const AntennaField::ConstPtr &field)
     itsFields.push_back(field);
 }
 
+size_t Station::nFields() const
+{
+    return itsFields.size();
+}
+
+AntennaField::ConstPtr Station::field(size_t i) const
+{
+    return (i < itsFields.size() ? itsFields[i] : AntennaField::ConstPtr());
+}
+
 Station::FieldList::const_iterator Station::beginFields() const
 {
     return itsFields.begin();
