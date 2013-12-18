@@ -40,7 +40,6 @@ namespace StationResponse
 // \addtogroup StationResponse
 // @{
 
-
 class Station
 {
 public:

@@ -31,6 +31,21 @@ namespace LOFAR
 namespace StationResponse
 {
 
+TileAntenna::TileAntenna(const TileConfig &config)
+    :   itsConfig(config)
+{
+}
+
+void TileAntenna::setConfig(const TileConfig &config)
+{
+    itsConfig = config;
+}
+
+const TileAntenna::TileConfig &TileAntenna::config() const
+{
+    return itsConfig;
+}
+
 raw_array_factor_t TileAntenna::rawArrayFactor(real_t freq,
     const vector3r_t &direction, const vector3r_t &direction0) const
 {

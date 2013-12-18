@@ -44,20 +44,11 @@ public:
 
     typedef static_array<vector3r_t, 16>    TileConfig;
 
-    explicit TileAntenna(const TileConfig &config)
-        :   itsConfig(config)
-    {
-    }
+    explicit TileAntenna(const TileConfig &config);
 
-    void setConfig(const TileConfig &config)
-    {
-        itsConfig = config;
-    }
+    void setConfig(const TileConfig &config);
 
-    const TileConfig &config() const
-    {
-        return itsConfig;
-    }
+    const TileConfig &config() const;
 
     virtual raw_array_factor_t rawArrayFactor(real_t freq,
         const vector3r_t &direction, const vector3r_t &direction0) const;

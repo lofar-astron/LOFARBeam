@@ -164,16 +164,6 @@ inline diag22c_t normalize(const raw_array_factor_t &raw)
     return af;
 }
 
-//inline matrix22c_t operator*(const diag22c_t &arg0, const matrix22c_t &arg1)
-//{
-//    matrix22c_t result;
-//    result[0][0] = arg0[0] * arg1[0][0];
-//    result[0][1] = arg0[0] * arg1[0][1];
-//    result[1][0] = arg0[1] * arg1[1][0];
-//    result[1][1] = arg0[1] * arg1[1][1];
-//    return result;
-//}
-
 // @}
 
 } //# namespace StationResponse
