@@ -1,280 +1,274 @@
-//# makebeamimage.cc: Generate images of the beam response of multiple stations
-//# for a given MS.
+//# makeresponseimage.cc: Generate images of the station response for a given
+//# MeasurementSet.
 //#
-//# Copyright (C) 2011
-//# Associated Universities, Inc. Washington DC, USA.
+//# Copyright (C) 2013
+//# ASTRON (Netherlands Institute for Radio Astronomy)
+//# P.O.Box 2, 7990 AA Dwingeloo, The Netherlands
 //#
-//# This program is free software; you can redistribute it and/or modify it
-//# under the terms of the GNU General Public License as published by the Free
-//# Software Foundation; either version 2 of the License, or (at your option)
-//# any later version.
+//# This file is part of the LOFAR software suite.
+//# The LOFAR software suite is free software: you can redistribute it and/or
+//# modify it under the terms of the GNU General Public License as published
+//# by the Free Software Foundation, either version 3 of the License, or
+//# (at your option) any later version.
 //#
-//# This program is distributed in the hope that it will be useful, but WITHOUT
-//# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-//# more details.
+//# The LOFAR software suite is distributed in the hope that it will be useful,
+//# but WITHOUT ANY WARRANTY; without even the implied warranty of
+//# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//# GNU General Public License for more details.
 //#
 //# You should have received a copy of the GNU General Public License along
-//# with this program; if not, write to the Free Software Foundation, Inc.,
-//# 675 Massachusetts Ave, Cambridge, MA 02139, USA.
-//#
-//# Correspondence concerning AIPS++ should be addressed as follows:
-//#        Internet email: aips2-request@nrao.edu.
-//#        Postal address: AIPS++ Project Office
-//#                        National Radio Astronomy Observatory
-//#                        520 Edgemont Road
-//#                        Charlottesville, VA 22903-2475 USA
+//# with the LOFAR software suite. If not, see <http://www.gnu.org/licenses/>.
 //#
 //# $Id$
 
 #include <lofar_config.h>
 
 #include <StationResponse/Package__Version.h>
-//#include <StationResponse/StationResponse.h>
 #include <StationResponse/LofarMetaDataUtil.h>
-
-//#include <LofarFT/LofarConvolutionFunction.h>
-
 #include <Common/InputParSet.h>
+#include <Common/lofar_sstream.h>
 #include <Common/LofarLogger.h>
 #include <Common/SystemUtil.h>
 #include <Common/Version.h>
-
+#include <coordinates/Coordinates/CoordinateSystem.h>
+#include <coordinates/Coordinates/SpectralCoordinate.h>
+#include <coordinates/Coordinates/StokesCoordinate.h>
+#include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <images/Images/PagedImage.h>
-#include <images/Images/HDF5Image.h>
-#include <images/Images/ImageFITSConverter.h>
-
-#include <ms/MeasurementSets/MSAntenna.h>
-#include <ms/MeasurementSets/MSAntennaParse.h>
-#include <ms/MeasurementSets/MSAntennaColumns.h>
+#include <measures/Measures/MCDirection.h>
+#include <measures/Measures/MCPosition.h>
+#include <measures/Measures/MDirection.h>
+#include <measures/Measures/MeasConvert.h>
+#include <measures/Measures/MeasTable.h>
+#include <measures/Measures/MEpoch.h>
+#include <measures/Measures/MPosition.h>
+#include <ms/MeasurementSets/MeasurementSet.h>
 #include <ms/MeasurementSets/MSDataDescription.h>
 #include <ms/MeasurementSets/MSDataDescColumns.h>
 #include <ms/MeasurementSets/MSField.h>
 #include <ms/MeasurementSets/MSFieldColumns.h>
 #include <ms/MeasurementSets/MSObservation.h>
 #include <ms/MeasurementSets/MSObsColumns.h>
-#include <ms/MeasurementSets/MSPolarization.h>
-#include <ms/MeasurementSets/MSPolColumns.h>
 #include <ms/MeasurementSets/MSSpectralWindow.h>
 #include <ms/MeasurementSets/MSSpWindowColumns.h>
-#include <ms/MeasurementSets/MSSelection.h>
+#include <tables/Tables/ExprNode.h>
 
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MEpoch.h>
-
-#include <casa/Arrays/ArrayUtil.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/ArrayIter.h>
-#include <casa/Utilities/Regex.h>
-#include <casa/Utilities/Assert.h>
-#include <casa/OS/Directory.h>
-#include <casa/OS/File.h>
-#include <casa/Exceptions/Error.h>
-#include <casa/OS/Timer.h>
-#include <casa/OS/PrecTimer.h>
-#include <casa/iostream.h>
-#include <casa/sstream.h>
-
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <coordinates/Coordinates/StokesCoordinate.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
-
+// There is no wrapped include file lofar_iterator.h.
 #include <iterator>
 
 using namespace casa;
 using namespace LOFAR;
+using namespace LOFAR::StationResponse;
 using LOFAR::operator<<;
 
-template <class T>
-void store(const Matrix<T> &data, const string &name)
+namespace
 {
-    Matrix<Double> xform(2, 2);
-    xform = 0.0;
-    xform.diagonal() = 1.0;
-    Quantum<Double> incLon((8.0 / data.shape()(0)) * C::pi / 180.0, "rad");
-    Quantum<Double> incLat((8.0 / data.shape()(1)) * C::pi / 180.0, "rad");
-    Quantum<Double> refLatLon(45.0 * C::pi / 180.0, "rad");
-    DirectionCoordinate dir(MDirection::J2000, Projection(Projection::SIN),
-        refLatLon, refLatLon, incLon, incLat, xform, data.shape()(0) / 2,
-        data.shape()(1) / 2);
-    store(dir, data, name);
-}
-
-template <class T>
-void store (const DirectionCoordinate &dir, const Matrix<T> &data,
-const string &name)
-{
-    //cout<<"Saving... "<<name<<endl;
-    Vector<Int> stokes(1);
-    stokes(0) = Stokes::I;
-    CoordinateSystem csys;
-    csys.addCoordinate(dir);
-    csys.addCoordinate(StokesCoordinate(stokes));
-    csys.addCoordinate(SpectralCoordinate(casa::MFrequency::TOPO, 60e6, 0.0,
-        0.0, 60e6));
-    PagedImage<T> im(TiledShape(IPosition(4, data.shape()(0), data.shape()(1),
-        1, 1)), csys, name);
-    im.putSlice(data, IPosition(4, 0, 0, 0, 0));
-}
-
-template <class T>
-void store(const Cube<T> &data, const string &name)
-{
-    Matrix<Double> xform(2, 2);
-    xform = 0.0;
-    xform.diagonal() = 1.0;
-    Quantum<Double> incLon((8.0 / data.shape()(0)) * C::pi / 180.0, "rad");
-    Quantum<Double> incLat((8.0 / data.shape()(1)) * C::pi / 180.0, "rad");
-    Quantum<Double> refLatLon(45.0 * C::pi / 180.0, "rad");
-    DirectionCoordinate dir(MDirection::J2000, Projection(Projection::SIN),
-        refLatLon, refLatLon, incLon, incLat, xform, data.shape()(0) / 2,
-        data.shape()(1) / 2);
-    store(dir, data, name);
-}
-
-template <class T>
-void store(const DirectionCoordinate &dir, const Cube<T> &data,
-const string &name)
-{
-    ASSERT(data.shape()(2) == 4);
-    //cout<<"Saving... "<<name<<endl;
-    Vector<Int> stokes(4);
-    stokes(0) = Stokes::XX;
-    stokes(1) = Stokes::XY;
-    stokes(2) = Stokes::YX;
-    stokes(3) = Stokes::YY;
-    CoordinateSystem csys;
-    csys.addCoordinate(dir);
-    csys.addCoordinate(StokesCoordinate(stokes));
-    csys.addCoordinate(SpectralCoordinate(casa::MFrequency::TOPO, 60e6, 0.0,
-        0.0, 60e6));
-    PagedImage<T> im(TiledShape(IPosition(4, data.shape()(0), data.shape()(1),
-        4, 1)), csys, name);
-    im.putSlice(data, IPosition(4, 0, 0, 0, 0));
-}
-
-Quantity readQuantity (const String& in)
-{
-  Quantity res;
-  bool status = Quantity::read(res, in);
-  ASSERT(status);
-  return res;
-}
-
-struct ITRFDirectionMap
-{
-    casa::MEpoch                epoch;
-    StationResponse::vector3r_t refDelay;
-    StationResponse::vector3r_t refTile;
-    casa::Cube<casa::Double>    directions;
-};
-
-ITRFDirectionMap makeDirectionMap(const MEpoch &epoch,
-    const MPosition &refPosition, const MDirection &refDelay,
-    const MDirection &refTile,
-    const DirectionCoordinate &coordinates,
-    const IPosition &shape)
-{
-    ASSERT(shape[0] > 0 && shape[1] > 0);
-
-    ITRFDirectionMap map;
-    map.epoch = epoch;
-
-    // Create conversion engine J2000 -> ITRF at epoch.
-    MDirection::Convert convertor = MDirection::Convert(MDirection::J2000,
-    MDirection::Ref(MDirection::ITRF,
-    MeasFrame(epoch, refPosition)));
-
-    MVDirection mvRefDelay = convertor(refDelay).getValue();
-    map.refDelay[0] = mvRefDelay(0);
-    map.refDelay[1] = mvRefDelay(1);
-    map.refDelay[2] = mvRefDelay(2);
-
-    MVDirection mvRefTile = convertor(refTile).getValue();
-    map.refTile[0] = mvRefTile(0);
-    map.refTile[1] = mvRefTile(1);
-    map.refTile[2] = mvRefTile(2);
-
-    MDirection world;
-    casa::Vector<Double> pixel = coordinates.referencePixel();
-
-    Cube<Double> mapITRF(3, shape[0], shape[1], 0.0);
-    for(pixel[1] = 0.0; pixel(1) < shape[1]; ++pixel[1])
+    /*!
+     *  \brief Map of ITRF directions required to compute an image of the
+     *  station beam.
+     *
+     *  The station beam library uses the ITRF coordinate system to express
+     *  station positions and source directions. Since the Earth moves with
+     *  respect to the sky, the ITRF coordinates of a source vary with time.
+     *  This structure stores the ITRF coordinates for the station and tile beam
+     *  former reference directions, as well as for a grid of points on the sky,
+     *  along with the time for which these ITRF coordinates are valid.
+     */
+    struct ITRFDirectionMap
     {
-        for(pixel[0] = 0.0; pixel[0] < shape[0]; ++pixel[0])
-        {
-            // CoodinateSystem::toWorld()
-            // DEC range [-pi/2,pi/2]
-            // RA range [-pi,pi]
-            if(coordinates.toWorld(world, pixel))
-            {
-                MVDirection mvITRF = convertor(world).getValue();
-                mapITRF(0, pixel[0], pixel[1]) = mvITRF(0);
-                mapITRF(1, pixel[0], pixel[1]) = mvITRF(1);
-                mapITRF(2, pixel[0], pixel[1]) = mvITRF(2);
-            }
-        }
-    }
+        /*!
+         *  \brief The time for which this ITRF direction map is valid (MJD(UTC)
+         *  in seconds).
+         */
+        double_t            time0;
 
-    map.directions.reference(mapITRF);
-    return map;
-}
+        /*!
+         *  \brief Station beam former reference direction expressed in ITRF
+         *  coordinates.
+         */
+        vector3r_t          station0;
 
-bool hasColumn(const Table &table, const string &column)
-{
-    return table.tableDesc().isColumn(column);
-}
+        /*!
+         *  \brief Tile beam former reference direction expressed in ITRF
+         *  coordinates.
+         */
+        vector3r_t          tile0;
 
-bool hasSubTable(const Table &table, const string &name)
-{
-    return table.keywordSet().isDefined(name);
-}
+        /*!
+         *  \brief ITRF coordinates for a grid of points on the sky.
+         */
+        Matrix<vector3r_t>  directions;
+    };
 
-Table getSubTable(const Table &table, const string &name)
-{
-    return table.keywordSet().asTable(name);
-}
+    /*!
+     *  \brief Create an ITRFDirectionMap.
+     *
+     *  \param coordinates Sky coordinate system definition.
+     *  \param shape Number of points along the RA and DEC axis.
+     *  \param epoch Time for which to compute the ITRF coordinates.
+     *  \param position0 Station beam former reference position (phase
+     *  reference).
+     *  \param station0 Station beam former reference direction (pointing).
+     *  \param tile0 Tile beam former reference direction (pointing).
+     */
+    ITRFDirectionMap makeDirectionMap(const DirectionCoordinate &coordinates,
+        const IPosition &shape, const MEpoch &epoch, const MPosition &position0,
+        const MDirection &station0, const MDirection &tile0);
 
-MDirection readPhaseReference(const MeasurementSet &ms, unsigned int idField)
-{
-    ROMSFieldColumns field(ms.field());
-    ASSERT(field.nrow() > idField);
-    ASSERT(!field.flagRow()(idField));
+    /*!
+     *  \brief Create a DirectionCoordinate instance that defines an image
+     *  coordinate system on the sky (J2000).
+     *
+     *  \param reference Direction that corresponds to the origin of the
+     *  coordinate system.
+     *  \param size Number of points along each axis (RA, DEC). The index of the
+     *  origin of the coordinate system is (size / 2, size / 2).
+     *  \param delta Angular step size in radians (assumed to be the same for
+     *  both axes).
+     */
+    DirectionCoordinate makeCoordinates(const MDirection &reference,
+        unsigned int size, double delta);
 
-    return field.phaseDirMeas(idField);
-}
+    /*!
+     *  \brief Convert an ITRF position given as a StationResponse::vector3r_t
+     *  instance to a casa::MPosition.
+     */
+    MPosition toMPositionITRF(const vector3r_t &position);
 
-MDirection readDelayReference(const MeasurementSet &ms, unsigned int idField)
-{
-    ROMSFieldColumns field(ms.field());
-    ASSERT(field.nrow() > idField);
-    ASSERT(!field.flagRow()(idField));
+    /*!
+     *  \brief Convert a casa::MPosition instance to a
+     *  StationResponse::vector3r_t instance.
+     */
+    vector3r_t fromMPosition(const MPosition &position);
 
-    return field.delayDirMeas(idField);
-}
+    /*!
+     *  \brief Convert a casa::MDirection instance to a
+     *  StationResponse::vector3r_t instance.
+     */
+    vector3r_t fromMDirection(const MDirection &direction);
 
-MDirection readTileReference(const MeasurementSet &ms, unsigned int idField)
-{
-    // The MeasurementSet class does not support LOFAR specific columns, so we
-    // use ROArrayMeasColumn to read the tile beam reference direction.
-    Table tab_field = getSubTable(ms, "FIELD");
+    /*!
+     *  \brief Check if the specified column exists as a column of the specified
+     *  table.
+     *
+     *  \param table The Table instance to check.
+     *  \param column The name of the column.
+     */
+    bool hasColumn(const Table &table, const string &column);
 
-    static const String columnName = "LOFAR_TILE_BEAM_DIR";
-    if(hasColumn(tab_field, columnName))
-    {
-        ROArrayMeasColumn<MDirection> c_direction(tab_field, columnName);
-        if(c_direction.isDefined(idField))
-        {
-            return c_direction(idField)(IPosition(1, 0));
-        }
-    }
+    /*!
+     *  \brief Check if the specified sub-table exists as a sub-table of the
+     *  specified table.
+     *
+     *  \param table The Table instance to check.
+     *  \param name The name of the sub-table.
+     */
+    bool hasSubTable(const Table &table, const string &name);
 
-    // By default, the tile beam reference direction is assumed to be equal
-    // to the station beam reference direction (for backward compatibility,
-    // and for non-HBA measurements).
-    return readDelayReference(ms, idField);
-}
+    /*!
+     *  \brief Provide access to a sub-table by name.
+     *
+     *  \param table The Table instance to which the sub-table is associated.
+     *  \param name The name of the sub-table.
+     */
+    Table getSubTable(const Table &table, const string &name);
+
+    /*!
+     *  \brief Attempt to read the position of the observatory. If the
+     *  observatory position is unknown, the specified default position is
+     *  returned.
+     *
+     *  \param ms MeasurementSet to read the observatory position from.
+     *  \param idObservation Identifier that determines of which observation the
+     *  observatory position should be read.
+     *  \param defaultPosition The position that will be returned if the
+     *  observatory position is unknown.
+     */
+    MPosition readObservatoryPosition(const MeasurementSet &ms,
+        unsigned int idObservation, const MPosition &defaultPosition);
+
+    /*!
+     *  \brief Read the list of unique timestamps.
+     *
+     *  \param ms MeasurementSet to read the list of unique timestamps from.
+     */
+    Vector<Double> readUniqueTimes(const MeasurementSet &ms);
+
+    /*!
+     *  \brief Read the reference frequency of the subband associated to the
+     *  specified data description identifier.
+     *
+     *  \param ms MeasurementSet to read the reference frequency from.
+     *  \param idDataDescription Identifier that determines of which subband the
+     *  reference frequency should be read.
+     */
+    double readFreqReference(const MeasurementSet &ms,
+        unsigned int idDataDescription);
+
+    /*!
+     *  \brief Read the phase reference direction.
+     *
+     *  \param ms MeasurementSet to read the phase reference direction from.
+     *  \param idField Identifier of the field of which the phase reference
+     *  direction should be read.
+     */
+    MDirection readPhaseReference(const MeasurementSet &ms,
+        unsigned int idField);
+
+    /*!
+     *  \brief Read the station beam former reference direction.
+     *
+     *  \param ms MeasurementSet to read the station beam former reference
+     *  direction from.
+     *  \param idField Identifier of the field of which the station beam former
+     *  reference direction should be read.
+     */
+    MDirection readDelayReference(const MeasurementSet &ms,
+        unsigned int idField);
+
+    /*!
+     *  \brief Read the station beam former reference direction.
+     *
+     *  \param ms MeasurementSet to read the tile beam former reference
+     *  direction from.
+     *  \param idField Identifier of the field of which the tile beam former
+     *  reference direction should be read.
+     */
+    MDirection readTileReference(const MeasurementSet &ms,
+        unsigned int idField);
+
+    /*!
+     *  \brief Store the specified cube of pixel data as a CASA image.
+     *
+     *  \param data Pixel data. The third dimension is assumed to be of length
+     *  4, referring to the correlation products XX, XY, YX, YY (in this order).
+     *  \param coordinates Sky coordinate system definition.
+     *  \param frequency Frequency for which the pixel data is valid (Hz).
+     *  \param name File name of the output image.
+     */
+    template <class T>
+    void store(const Cube<T> &data, const DirectionCoordinate &coordinates,
+        double frequency, const string &name);
+
+    /*!
+     *  \brief Convert a string to a CASA Quantity (value with unit).
+     */
+    Quantity readQuantity(const String &in);
+
+    /*!
+     *  \brief Remove all elements from the range [first, last) that fall
+     *  outside the interval [min, max].
+     *
+     *  This function returns an iterator new_last such that the range [first,
+     *  new_last) contains no elements that fall outside the interval [min,
+     *  max]. The iterators in the range [new_last, last) are all still
+     *  dereferenceable, but the elements that they point to are unspecified.
+     *  The order of the elements that are not removed is unchanged.
+     */
+    template <typename T>
+    T filter(T first, T last, int min, int max);
+} //# unnamed namespace
+
 
 int main(int argc, char *argv[])
 {
@@ -282,10 +276,10 @@ int main(int argc, char *argv[])
     INIT_LOGGER(basename(string(argv[0])));
     Version::show<StationResponseVersion>(cout);
 
+    // Parse inputs.
     LOFAR::InputParSet inputs;
     inputs.create("ms", "", "Name of input MeasurementSet", "string");
-    inputs.create("stations", "[0]", "IDs of stations to process",
-        "int vector");
+    inputs.create("stations", "0", "IDs of stations to process", "int vector");
     inputs.create("cellsize", "60arcsec", "Angular pixel size",
         "quantity string");
     inputs.create("size", "256", "Number of pixels along each axis", "int");
@@ -298,41 +292,42 @@ int main(int argc, char *argv[])
         " older versions of casaviewer)", "bool");
     inputs.readArguments(argc, argv);
 
-    String msName = inputs.getString("ms");
-    ASSERT(!msName.empty());
-
-    vector<int> stationID(inputs.getIntVector("stations"));
+    vector<int> stationIDs(inputs.getIntVector("stations"));
     Quantity cellsize = readQuantity(inputs.getString("cellsize"));
-    size_t size = max(inputs.getInt("size"), 1);
+    unsigned int size = max(inputs.getInt("size"), 1);
     Quantity offset = readQuantity(inputs.getString("offset"));
-    size_t nFrames = max(inputs.getInt("frames"), 1);
+    unsigned int nFrames = max(inputs.getInt("frames"), 1);
     Bool abs = inputs.getBool("abs");
 
-    // ---------------------------------------------------------------------- //
+    // Open MS.
+    MeasurementSet ms(inputs.getString("ms"));
+    unsigned int idObservation = 0, idField = 0, idDataDescription = 0;
 
-    MeasurementSet ms(msName);
+    // Read station meta-data.
+    vector<Station::Ptr> stations;
+    readStations(ms, std::back_inserter(stations));
 
-    uInt idObservation = 0;
-    uInt idField = 0;
-    uInt idDataDescription = 0;
+    // Remove illegal station indices.
+    stationIDs.erase(filter(stationIDs.begin(), stationIDs.end(), 0,
+        static_cast<int>(stations.size()) - 1), stationIDs.end());
 
-    // Read number of stations.
-    ROMSAntennaColumns antenna(ms.antenna());
-    uInt nStation = antenna.nrow();
+    // Read unique timestamps
+    Table selection =
+        ms(ms.col("OBSERVATION_ID") == static_cast<Int>(idObservation)
+            && ms.col("FIELD_ID") == static_cast<Int>(idField)
+            && ms.col("DATA_DESC_ID") == static_cast<Int>(idDataDescription));
+    Vector<Double> time = readUniqueTimes(selection);
 
-    // Filter invalid station IDs.
-    vector<unsigned int> filteredID;
-    for(vector<int>::const_iterator it = stationID.begin(),
-        end = stationID.end(); it != end; ++it)
-    {
-        if(*it >= 0 && static_cast<size_t>(*it) < nStation)
-        {
-            filteredID.push_back(*it);
-        }
-    }
+    // Read reference frequency.
+    double refFrequency = readFreqReference(ms, idDataDescription);
+
+    // Use the position of the first selected station as the array reference
+    // position if the observatory position cannot be found.
+    MPosition refPosition = readObservatoryPosition(ms, idField,
+        toMPositionITRF(stations.front()->position()));
 
     // Read phase reference direction.
-    MDirection refDir = readPhaseReference(ms, idField);
+    MDirection refPhase = readPhaseReference(ms, idField);
 
     // Read delay reference direction.
     MDirection refDelay = readDelayReference(ms, idField);
@@ -340,182 +335,302 @@ int main(int argc, char *argv[])
     // Read tile reference direction.
     MDirection refTile = readTileReference(ms, idField);
 
-    // Read reference frequency.
-    ROMSDataDescColumns desc(ms.dataDescription());
-    ASSERT(desc.nrow() > idDataDescription);
-    ASSERT(!desc.flagRow()(idDataDescription));
-    uInt idWindow = desc.spectralWindowId()(idDataDescription);
-
-    ROMSSpWindowColumns window(ms.spectralWindow());
-    ASSERT(window.nrow() > idWindow);
-    ASSERT(!window.flagRow()(idWindow));
-
-    double refFreq = window.refFrequency()(idWindow);
-
-    // Read reference time.
-    Table msView =
-        ms(ms.col("OBSERVATION_ID") == static_cast<Int>(idObservation)
-        && ms.col("FIELD_ID") == static_cast<Int>(idField)
-        && ms.col("DATA_DESC_ID") == static_cast<Int>(idDataDescription));
-
-    Table tab_sorted = msView.sort("TIME", Sort::Ascending,
-        Sort::HeapSort | Sort::NoDuplicates);
-
-    ROScalarColumn<Double> c_time(tab_sorted, "TIME");
-    Vector<Double> time = c_time.getColumn();
-
-    // ---------------------------------------------------------------------- //
-
-    MDirection refDirJ2000(MDirection::Convert(refDir, MDirection::J2000)());
-    Quantum<Vector<Double> > angles = refDirJ2000.getAngle();
-
-    double ra = angles.getBaseValue()(0);
-    double dec = angles.getBaseValue()(1);
-    double delta = cellsize.getValue("rad");
-
-    // Construct DirectionCoordinate instance.
-    Matrix<Double> xform(2,2);
-    xform = 0.0; xform.diagonal() = 1.0;
-    DirectionCoordinate coordinates(MDirection::J2000,
-                            Projection(Projection::SIN),
-                            ra, dec,
-                            -delta, delta,
-                            xform,
-                            size / 2, size / 2);
-
-    // ---------------------------------------------------------------------- //
-
-//    StationResponse::Instrument::Ptr instrument = StationResponse::readInstrument(ms,
-//        idObservation);
-
-
-    vector<StationResponse::Station::Ptr> antennae;
-    StationResponse::readStations(ms, std::back_inserter(antennae));
-
-//    ROMSAntennaColumns aips_antenna(ms.antenna());
-//    for(unsigned int i = 0; i < aips_antenna.nrow(); ++i)
-//    {
-//        antennae.push_back(StationResponse::readStationLBA(ms, i));
-//    }
-
-    MVPosition mvRefPos(0.0, 0.0, 0.0);
-    for(size_t i = 0; i < antennae.size(); ++i)
-    {
-        mvRefPos(0) += antennae[i]->position()[0];
-        mvRefPos(1) += antennae[i]->position()[1];
-        mvRefPos(2) += antennae[i]->position()[2];
-    }
-    mvRefPos(0) /= static_cast<double>(antennae.size());
-    mvRefPos(1) /= static_cast<double>(antennae.size());
-    mvRefPos(2) /= static_cast<double>(antennae.size());
-
-    MPosition refPos(mvRefPos, MPosition::ITRF);
-
-//    MPosition refPos(MVPosition(instrument->position()[0], instrument->position()[1], instrument->position()[2]), MPosition::ITRF);
-//    LofarATerm aTerm(ms, Record());
-
+    // Create image coordinate system.
     IPosition shape(2, size, size);
-//    aTerm.setDirection(coordinates, shape);
+    DirectionCoordinate coordinates = makeCoordinates(refPhase, size,
+        cellsize.getValue("rad"));
 
-    Vector<Double> freq(1, refFreq);
+    // Compute station response images.
+    Cube<Complex> response(size, size, 4);
 
+    MEpoch refEpoch;
     Quantity refTime(time(0), "s");
     refTime = refTime + offset;
-
     Quantity deltaTime((time(time.size() - 1) - time(0) - offset.getValue("s"))
         / (nFrames - 1), "s");
 
-//    StationResponse::ITRFDirectionFuncCasa::Ptr itrfdircasa(new StationResponse::ITRFDirectionFuncCasa(refDelay, refPos));
-
-//    cout << "computing..." << endl;
     for(size_t j = 0; j < nFrames; ++j)
     {
-        cout << "frame: " << j << " " << flush;
+        cout << "[ Frame: " << (j + 1) << "/" << nFrames << " Offset: +"
+            << refTime.getValue() - time(0) << " s ]" << endl;
 
-        MEpoch refEpoch;
+        // Update reference epoch.
         refEpoch.set(refTime);
-//        aTerm.setEpoch(refEpoch);
 
-        cout << "map..." << flush;
-        ITRFDirectionMap _map = makeDirectionMap(refEpoch, refPos, refDelay,
-            refTile, coordinates, shape);
+        cout << "Creating ITRF direction map... " << flush;
+        ITRFDirectionMap directionMap = makeDirectionMap(coordinates, shape,
+            refEpoch, refPosition, refDelay, refTile);
+        cout << "done." << endl;
 
-        cout << "done. " << flush;
-
-//        StationResponse::vector3r_t itrfdircasaat = itrfdircasa->at(refTime.getValue());
-//        cout << "ITRF: " << itrfdircasaat[0] << " " << itrfdircasaat[1] << " " << itrfdircasaat[2] << " ";
-//        cout << "ITRF: " << _map.refDelay[0] << " " << _map.refDelay[1] << " " << _map.refDelay[2] << " ";
-//        cout << flush;
-
-        for(vector<unsigned int>::const_iterator it = filteredID.begin(),
-            end = filteredID.end(); it != end; ++it)
-
+        cout << "Computing response images... " << flush;
+        for(vector<int>::const_iterator it = stationIDs.begin(),
+            end = stationIDs.end(); it != end; ++it)
         {
-            cout << "station: " << *it << " response..." << flush;
-//            StationResponse::Station::ConstPtr station = instrument->station(*it);
-//            StationResponse::AntennaField::ConstPtr field = station->field(0);
-//            vector<Cube<Complex> > response = aTerm.evaluate(*it, freq, freq);
+            Station::ConstPtr station = stations[*it];
+            cout << *it << ":" << station->name() << " " << flush;
 
-            StationResponse::Station::ConstPtr antenna = antennae[*it];
-
-            StationResponse::matrix22c_t resp;
-            Cube<Complex> response(size, size, 4);
-//            Matrix<Complex> response(size, size);
             for(size_t y = 0; y < size; ++y)
-            for(size_t x = 0; x < size; ++x)
             {
-                StationResponse::vector3r_t target = {{_map.directions(0, x, y), _map.directions(1, x, y), _map.directions(2, x, y)}};
+                for(size_t x = 0; x < size; ++x)
+                {
+                    matrix22c_t E = station->response(directionMap.time0,
+                        refFrequency, directionMap.directions(x, y),
+                        refFrequency, directionMap.station0,
+                        directionMap.tile0);
 
-//                StationResponse::diag22c_t af = array_factor_test(field,
-//                    refFreq, target, refFreq, _map.refDelay);
-//                response(x, y) = af[0];
-
-//                StationResponse::matrix22c_t resp = station_response(station,
-//                    refFreq, target, refFreq, _map.refDelay);
-
-//                spectral_station_response(station, 1, freq.data(), target,
-//                    freq.data(), _map.refDelay, &resp);
-//                antenna->response(1,target, _map.refDelay, _map.refTile,
-//                    freq.data(), freq.data(), &resp);
-
-                resp = antenna->response(refTime.getValue(), refFreq, target,
-                    refFreq, _map.refDelay, _map.refTile);
-
-                response(x, y, 0) = resp[0][0];
-                response(x, y, 1) = resp[0][1];
-                response(x, y, 2) = resp[1][0];
-                response(x, y, 3) = resp[1][1];
+                    response(x, y, 0) = E[0][0];
+                    response(x, y, 1) = E[0][1];
+                    response(x, y, 2) = E[1][0];
+                    response(x, y, 3) = E[1][1];
+                }
             }
-
-            cout << response(0, 0, 0) << " " << flush;
-
-            cout << "store..." << flush;
 
             std::ostringstream oss;
-            oss << "response-id-" << *it;
-            if(nFrames > 1)
-            {
-                oss << "-frame-" << j;
-            }
-            oss << ".img";
+            oss << "response-" << station->name() << "-frame-" << (j + 1)
+                << ".img";
 
             if(abs)
             {
-                Cube<Float> ampl(amplitude(response));
-                store(coordinates, ampl, oss.str());
+                store(Cube<Float>(amplitude(response)), coordinates,
+                    refFrequency, oss.str());
             }
             else
             {
-                store(coordinates, response, oss.str());
+                store(response, coordinates, refFrequency, oss.str());
             }
-
-            cout << "done. " << flush;
         }
         cout << endl;
 
         refTime = refTime + deltaTime;
     }
-    cout << " done." << endl;
 
     return 0;
 }
+
+namespace
+{
+    ITRFDirectionMap makeDirectionMap(const DirectionCoordinate &coordinates,
+        const IPosition &shape, const MEpoch &epoch, const MPosition &position0,
+        const MDirection &station0, const MDirection &tile0)
+    {
+        ITRFDirectionMap map;
+
+        // Convert from MEpoch to a time in MJD(UTC) in seconds.
+        MEpoch mEpochUTC = MEpoch::Convert(epoch, MEpoch::Ref(MEpoch::UTC))();
+        MVEpoch mvEpochUTC = mEpochUTC.getValue();
+        Quantity qEpochUTC = mvEpochUTC.getTime();
+        map.time0 = qEpochUTC.getValue("s");
+
+        // Create conversion engine J2000 => ITRF at the specified epoch.
+        MDirection::Convert convertor = MDirection::Convert(MDirection::J2000,
+          MDirection::Ref(MDirection::ITRF, MeasFrame(epoch, position0)));
+
+        // Compute station and tile beam former reference directions in ITRF at
+        // the specified epoch.
+        map.station0 = fromMDirection(convertor(station0));
+        map.tile0 = fromMDirection(convertor(tile0));
+
+        // Pre-allocate space for the grid of ITRF directions.
+        map.directions.resize(shape);
+
+        // Compute ITRF directions.
+        MDirection world;
+        Vector<Double> pixel = coordinates.referencePixel();
+        for(pixel(1) = 0.0; pixel(1) < shape(1); ++pixel(1))
+        {
+            for(pixel(0) = 0.0; pixel(0) < shape(0); ++pixel(0))
+            {
+                // CoordinateSystem::toWorld(): RA range [-pi,pi], DEC range
+                // [-pi/2,pi/2].
+                if(coordinates.toWorld(world, pixel))
+                {
+                    map.directions(pixel(0), pixel(1)) =
+                        fromMDirection(convertor(world));
+                }
+            }
+        }
+
+        return map;
+    }
+
+    DirectionCoordinate makeCoordinates(const MDirection &reference,
+        unsigned int size, double delta)
+    {
+        MDirection referenceJ2000 = MDirection::Convert(reference,
+            MDirection::J2000)();
+        Quantum<Vector<Double> > referenceAngles = referenceJ2000.getAngle();
+        double ra = referenceAngles.getBaseValue()(0);
+        double dec = referenceAngles.getBaseValue()(1);
+
+        Matrix<Double> xform(2,2);
+        xform = 0.0; xform.diagonal() = 1.0;
+        return DirectionCoordinate(MDirection::J2000,
+            Projection(Projection::SIN), ra, dec, -delta, delta, xform,
+            size / 2, size / 2);
+    }
+
+    MPosition toMPositionITRF(const vector3r_t &position)
+    {
+        MVPosition mvITRF(position[0], position[1], position[2]);
+        return MPosition(mvITRF, MPosition::ITRF);
+    }
+
+    vector3r_t fromMPosition(const MPosition &position)
+    {
+        MVPosition mvPosition = position.getValue();
+        vector3r_t result = {{mvPosition(0), mvPosition(1), mvPosition(2)}};
+        return result;
+    }
+
+    vector3r_t fromMDirection(const MDirection &direction)
+    {
+      MVDirection mvDirection = direction.getValue();
+      vector3r_t result = {{mvDirection(0), mvDirection(1), mvDirection(2)}};
+      return result;
+    }
+
+    bool hasColumn(const Table &table, const string &column)
+    {
+        return table.tableDesc().isColumn(column);
+    }
+
+    bool hasSubTable(const Table &table, const string &name)
+    {
+        return table.keywordSet().isDefined(name);
+    }
+
+    Table getSubTable(const Table &table, const string &name)
+    {
+        return table.keywordSet().asTable(name);
+    }
+
+    MPosition readObservatoryPosition(const MeasurementSet &ms,
+        unsigned int idObservation, const MPosition &defaultPosition)
+    {
+        // Get the instrument position in ITRF coordinates, or use the centroid
+        // of the station positions if the instrument position is unknown.
+        ROMSObservationColumns observation(ms.observation());
+        ASSERT(observation.nrow() > idObservation);
+        ASSERT(!observation.flagRow()(idObservation));
+
+        // Read observatory name and try to look-up its position.
+        const string observatory = observation.telescopeName()(idObservation);
+
+        // Look-up observatory position, default to specified default position.
+        MPosition position(defaultPosition);
+        MeasTable::Observatory(position, observatory);
+        return position;
+    }
+
+    Vector<Double> readUniqueTimes(const MeasurementSet &ms)
+    {
+        Table tab_sorted = ms.sort("TIME", Sort::Ascending, Sort::HeapSort
+            | Sort::NoDuplicates);
+
+        ROScalarColumn<Double> c_time(tab_sorted, "TIME");
+        return c_time.getColumn();
+    }
+
+    double readFreqReference(const MeasurementSet &ms,
+        unsigned int idDataDescription)
+    {
+        ROMSDataDescColumns desc(ms.dataDescription());
+        ASSERT(desc.nrow() > idDataDescription);
+        ASSERT(!desc.flagRow()(idDataDescription));
+        uInt idWindow = desc.spectralWindowId()(idDataDescription);
+
+        ROMSSpWindowColumns window(ms.spectralWindow());
+        ASSERT(window.nrow() > idWindow);
+        ASSERT(!window.flagRow()(idWindow));
+
+        return window.refFrequency()(idWindow);
+    }
+
+    MDirection readPhaseReference(const MeasurementSet &ms,
+        unsigned int idField)
+    {
+        ROMSFieldColumns field(ms.field());
+        ASSERT(field.nrow() > idField);
+        ASSERT(!field.flagRow()(idField));
+
+        return field.phaseDirMeas(idField);
+    }
+
+    MDirection readDelayReference(const MeasurementSet &ms,
+        unsigned int idField)
+    {
+        ROMSFieldColumns field(ms.field());
+        ASSERT(field.nrow() > idField);
+        ASSERT(!field.flagRow()(idField));
+
+        return field.delayDirMeas(idField);
+    }
+
+    MDirection readTileReference(const MeasurementSet &ms, unsigned int idField)
+    {
+        // The MeasurementSet class does not support LOFAR specific columns, so
+        // we use ROArrayMeasColumn to read the tile beam reference direction.
+        Table tab_field = getSubTable(ms, "FIELD");
+
+        static const String columnName = "LOFAR_TILE_BEAM_DIR";
+        if(hasColumn(tab_field, columnName))
+        {
+            ROArrayMeasColumn<MDirection> c_direction(tab_field, columnName);
+            if(c_direction.isDefined(idField))
+            {
+                return c_direction(idField)(IPosition(1, 0));
+            }
+        }
+
+        // By default, the tile beam reference direction is assumed to be equal
+        // to the station beam reference direction (for backward compatibility,
+        // and for non-HBA measurements).
+        return readDelayReference(ms, idField);
+    }
+
+    template <class T>
+    void store(const Cube<T> &data, const DirectionCoordinate &coordinates,
+        double frequency, const string &name)
+    {
+        ASSERT(data.shape()(2) == 4);
+
+        Vector<Int> stokes(4);
+        stokes(0) = Stokes::XX;
+        stokes(1) = Stokes::XY;
+        stokes(2) = Stokes::YX;
+        stokes(3) = Stokes::YY;
+
+        CoordinateSystem csys;
+        csys.addCoordinate(coordinates);
+        csys.addCoordinate(StokesCoordinate(stokes));
+        csys.addCoordinate(SpectralCoordinate(MFrequency::TOPO, frequency, 0.0,
+            0.0));
+
+        PagedImage<T> im(TiledShape(IPosition(4, data.shape()(0),
+            data.shape()(1), 4, 1)), csys, name);
+        im.putSlice(data, IPosition(4, 0, 0, 0, 0));
+    }
+
+    Quantity readQuantity(const String &in)
+    {
+        Quantity result;
+        bool status = Quantity::read(result, in);
+        ASSERT(status);
+        return result;
+    }
+
+    template <typename T>
+    T filter(T first, T last, int min, int max)
+    {
+        T new_last = first;
+        for(; first != last; ++first)
+        {
+            if(*first >= min && *first <= max)
+            {
+                *new_last++ = *first;
+            }
+        }
+
+        return new_last;
+    }
+} // unnamed namespace.

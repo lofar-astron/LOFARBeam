@@ -110,105 +110,137 @@ public:
 
     typedef vector<Antenna> AntennaList;
 
-    AntennaField(const string &name, const CoordinateSystem &coordinates)
-        :   itsName(name),
-            itsCoordinateSystem(coordinates),
-            itsNCPCacheTime(-1)
-    {
-        vector3r_t ncp = {{0.0, 0.0, 1.0}};
-        itsNCP.reset(new ITRFDirection(position(), ncp));
-    }
 
-    virtual ~AntennaField()
-    {
-    }
+    AntennaField(const string &name, const CoordinateSystem &coordinates);
 
-    const string &name() const
-    {
-        return itsName;
-    }
+    virtual ~AntennaField();
 
-    const vector3r_t &position() const
-    {
-        return itsCoordinateSystem.origin;
-    }
+    /** Return the name of the antenna field. */
+    const string &name() const;
 
-    const CoordinateSystem &coordinates() const
-    {
-        return itsCoordinateSystem;
-    }
+    /** Return the phase reference position of the antenna field. */
+    const vector3r_t &position() const;
 
-    void addAntenna(const Antenna &antenna)
-    {
-        itsAntennae.push_back(antenna);
-    }
+    /** Return the antenna field coordinate system. */
+    const CoordinateSystem &coordinates() const;
 
-    size_t nAntennae() const
-    {
-        return itsAntennae.size();
-    }
+    /** Add an antenna to the antenna field. */
+    void addAntenna(const Antenna &antenna);
 
-    const Antenna &antenna(size_t n) const
-    {
-        return itsAntennae[n];
-    }
+    /** Return the number of antennae in the antenna field. */
+    size_t nAntennae() const;
 
-    Antenna &antenna(size_t n)
-    {
-        return itsAntennae[n];
-    }
+    /*!
+     *  \name Antennae accessors
+     *  These member functions provide access to the antennae that are part of
+     *  the antenna field.
+     */
+    // @{
 
-    AntennaList::const_iterator beginAntennae() const
-    {
-        return itsAntennae.begin();
-    }
+    /** Return a read-only reference to the antenna with the requested index. */
+    const Antenna &antenna(size_t n) const;
 
-    AntennaList::const_iterator endAntennae() const
-    {
-        return itsAntennae.end();
-    }
+    /** Return a writeable reference to the antenna with the requested index. */
+    Antenna &antenna(size_t n);
 
-    /**
-     *  \brief Compute the response of the antenna field for a plane wave of a
-     *  given frequency arriving from a given direction.
-     *  \param time Time (UTC, s).
+    /** Return a read-only iterator that points to the first antenna of the
+     *  antenna field.
+     */
+    AntennaList::const_iterator beginAntennae() const;
+
+    /** Return a read-only iterator that points one position past the last
+     *  antenna of the antenna field.
+     */
+    AntennaList::const_iterator endAntennae() const;
+
+    // @}
+
+    /*!
+     *  \brief Compute the response of the antenna field for a plane wave of
+     *  frequency \p freq, arriving from direction \p direction, with the analog
+     *  %tile beam former steered towards \p direction0. For LBA antenna fields,
+     *  \p direction0 has no effect.
+     *
+     *  \param time Time, modified Julian date, UTC, in seconds (MJD(UTC), s).
      *  \param freq Frequency of the plane wave (Hz).
      *  \param direction Direction of arrival (ITRF, m).
-     *  \param freq0 Beamformer reference frequency (Hz).
-     *  \param station0 Beamformer reference direction (ITRF, m).
-     *  \return A Jones matrix that represents the %antenna field response.
+     *  \param direction0 Tile beam former reference direction (ITRF, m).
+     *  \return Jones matrix that represents the response of the antenna field.
      *
-     *  For any given sub band, the %LOFAR station beam former computes weights
-     *  for a single reference frequency. Usually, this reference frequency is
-     *  the center frequency of the sub band. For any frequency except the
-     *  reference frequency, these weights are an approximation. This aspect of
-     *  the system is taken into account in the computation of the response.
-     *  Therefore, both the frequency of interest \p freq and the reference
-     *  frequency \p freq0 need to be specified.
-     *
-     *  Both \p target and \p reference are vectors that represent a direction
-     *  of \e arrival, i.e. these are vectors of unit length that point \e from
-     *  the antenna field \e towards the direction from which the plane wave
-     *  arrives.
+     *  The directions \p direction, and \p direction0 are vectors that
+     *  represent a direction of \e arrival. These vectors have unit length and
+     *  point \e from the ground \e towards the direction from which the plane
+     *  wave arrives.
      */
     virtual matrix22c_t response(real_t time, real_t freq,
         const vector3r_t &direction, const vector3r_t &direction0) const;
 
+    /*!
+     *  \brief Compute the array factor of the antenna field for a plane wave of
+     *  frequency \p freq, arriving from direction \p direction, analog %tile
+     *  beam former steered towards \p direction0. For LBA antenna fields,
+     *  \p direction0 has no effect.
+     *
+     *  \param time Time, modified Julian date, UTC, in seconds (MJD(UTC), s).
+     *  \param freq Frequency of the plane wave (Hz).
+     *  \param direction Direction of arrival (ITRF, m).
+     *  \param direction0 Tile beam former reference direction (ITRF, m).
+     *  \return A diagonal matrix with the array factor of the X and Y antennae.
+     *
+     *  The directions \p direction, and \p direction0 are vectors that
+     *  represent a direction of \e arrival. These vectors have unit length and
+     *  point \e from the ground \e towards the direction from which the plane
+     *  wave arrives.
+     */
     virtual diag22c_t arrayFactor(real_t time, real_t freq,
         const vector3r_t &direction, const vector3r_t &direction0) const;
 
+    /*!
+     *  \brief Compute the response of the antenna field for a plane wave of
+     *  frequency \p freq, arriving from direction \p direction, with the analog
+     *  %tile beam former steered towards \p direction0. For LBA antenna fields,
+     *  \p direction0 has no effect.
+     *
+     *  This method returns the non-normalized (raw) response. This allows the
+     *  response of several antenna fields to be summed together, followed by
+     *  normalization of the sum.
+     *
+     *  \see response(real_t time, real_t freq, const vector3r_t &direction,
+     *  const vector3r_t &direction0) const
+     */
     virtual raw_response_t rawResponse(real_t time, real_t freq,
         const vector3r_t &direction, const vector3r_t &direction0) const;
 
+    /*!
+     *  \brief Compute the array factor of the antenna field for a plane wave of
+     *  frequency \p freq, arriving from direction \p direction, analog %tile
+     *  beam former steered towards \p direction0. For LBA antenna fields,
+     *  \p direction0 has no effect.
+     *
+     *  This method returns the non-normalized (raw) array factor. This allows
+     *  the array factor of several antenna fields to be summed together,
+     *  followed by normalization of the sum.
+     *
+     *  \see diag22c_t arrayFactor(real_t time, real_t freq,
+     *  const vector3r_t &direction, const vector3r_t &direction0) const
+     */
     virtual raw_array_factor_t rawArrayFactor(real_t time, real_t freq,
         const vector3r_t &direction, const vector3r_t &direction0) const = 0;
 
-    virtual matrix22c_t singleElementResponse(real_t time, real_t freq,
+    /*!
+     *  \brief Compute the response of a single antenna for a plane wave of
+     *  frequency \p freq, arriving from direction \p direction.
+     *
+     */
+    virtual matrix22c_t elementResponse(real_t time, real_t freq,
         const vector3r_t &direction) const = 0;
 
 protected:
+    /** Compute the parallactic rotation. */
     matrix22r_t rotation(real_t time, const vector3r_t &direction) const;
-    vector3r_t itrf2station(const vector3r_t &itrf) const;
+
+    /** Transform a vector from ITRF to antenna field coordinates. */
+    vector3r_t itrf2field(const vector3r_t &itrf) const;
 
 private:
     vector3r_t ncp(real_t time) const;

@@ -80,13 +80,9 @@ TileAntenna::TileConfig readTileConfig(const Table &table, unsigned int row)
 
     // Read tile configuration for HBA antenna fields.
     Matrix<Quantity> aips_offset = c_tile_offset(row);
-
-//            ASSERTSTR(nElement > 0, "Antenna field #" << i << " of antenna "
-//                << name << " is reported to be an HBA field, but no HBA tile"
-//                " layout information is available for it.");
+    assert(aips_offset.ncolumn() == TileAntenna::TileConfig::size());
 
     TileAntenna::TileConfig config;
-    // assert(aips_offset.ncolumn() == config.size())
     for(unsigned int i = 0; i < config.size(); ++i)
     {
         config[i][0] = aips_offset(0, i).getValue();
@@ -116,14 +112,14 @@ AntennaField::CoordinateSystem readCoordinateSystem(const Table &table,
 
     // Read antenna field center (ITRF).
     Vector<Quantity> aips_position = c_position(id);
-//        ASSERT(aips_position.size() == 3);
+    assert(aips_position.size() == 3);
 
     vector3r_t position = {{aips_position(0).getValue(),
         aips_position(1).getValue(), aips_position(2).getValue()}};
 
     // Read antenna field coordinate axes (ITRF).
     Matrix<Quantity> aips_axes = c_axes(id);
-//        ASSERT(aips_axes.shape().isEqual(IPosition(2, 3, 3)));
+    assert(aips_axes.shape().isEqual(IPosition(2, 3, 3)));
 
     vector3r_t p = {{aips_axes(0, 0).getValue(), aips_axes(1, 0).getValue(),
         aips_axes(2, 0).getValue()}};
@@ -144,12 +140,10 @@ void readAntennae(const Table &table, unsigned int id,
 
     // Read element offsets and flags.
     Matrix<Quantity> aips_offset = c_offset(id);
-    Matrix<Bool> aips_flag = c_flag(id);
+    assert(aips_offset.shape().isEqual(IPosition(2, 3, aips_offset.ncolumn())));
 
-//        ASSERTSTR(nElement > 0, "Antenna field #" << i << " of antenna " << name
-//            << " contains no antenna elements.");
-//        ASSERT(aips_offset.shape().isEqual(IPosition(2, 3, nElement)));
-//        ASSERT(aips_flag.shape().isEqual(IPosition(2, 2, nElement)));
+    Matrix<Bool> aips_flag = c_flag(id);
+    assert(aips_flag.shape().isEqual(IPosition(2, 2, aips_offset.ncolumn())));
 
     for(size_t i = 0; i < aips_offset.ncolumn(); ++i)
     {
@@ -209,6 +203,7 @@ void readStationPhaseReference(const Table &table, unsigned int id,
 Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
 {
     ROMSAntennaColumns antenna(ms.antenna());
+    assert(antenna.nrow() > id && !antenna.flagRow()(id));
 
     // Get station name.
     const string name(antenna.name()(id));
@@ -231,7 +226,7 @@ Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
 
     for(size_t i = 0; i < tab_field.nrow(); ++i)
     {
-        station->addAntennaField(readAntennaField(tab_field, i));
+        station->addField(readAntennaField(tab_field, i));
     }
 
     return station;
