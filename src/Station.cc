@@ -56,9 +56,19 @@ const vector3r_t &Station::phaseReference() const
     return itsPhaseReference;
 }
 
-void Station::addAntennaField(const AntennaField::ConstPtr &field)
+void Station::addField(const AntennaField::ConstPtr &field)
 {
     itsFields.push_back(field);
+}
+
+size_t Station::nFields() const
+{
+    return itsFields.size();
+}
+
+AntennaField::ConstPtr Station::field(size_t i) const
+{
+    return (i < itsFields.size() ? itsFields[i] : AntennaField::ConstPtr());
 }
 
 Station::FieldList::const_iterator Station::beginFields() const
@@ -85,13 +95,11 @@ matrix22c_t Station::response(real_t time, real_t freq,
         raw_response_t antenna = (*field_it)->rawResponse(time, freq,
             direction, tile0);
 
-//        response += af.factor * antennaResponse;
         result.response[0][0] += field.factor[0] * antenna.response[0][0];
         result.response[0][1] += field.factor[0] * antenna.response[0][1];
         result.response[1][0] += field.factor[1] * antenna.response[1][0];
         result.response[1][1] += field.factor[1] * antenna.response[1][1];
 
-//        weight += af.weight;
         result.weight[0] += field.weight[0] * antenna.weight[0];
         result.weight[1] += field.weight[1] * antenna.weight[1];
     }

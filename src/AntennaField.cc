@@ -32,6 +32,65 @@ namespace LOFAR
 namespace StationResponse
 {
 
+AntennaField::AntennaField(const string &name,
+    const CoordinateSystem &coordinates)
+    :   itsName(name),
+        itsCoordinateSystem(coordinates),
+        itsNCPCacheTime(-1)
+{
+    vector3r_t ncp = {{0.0, 0.0, 1.0}};
+    itsNCP.reset(new ITRFDirection(position(), ncp));
+}
+
+AntennaField::~AntennaField()
+{
+}
+
+const string &AntennaField::name() const
+{
+    return itsName;
+}
+
+const vector3r_t &AntennaField::position() const
+{
+    return itsCoordinateSystem.origin;
+}
+
+const AntennaField::CoordinateSystem &AntennaField::coordinates() const
+{
+    return itsCoordinateSystem;
+}
+
+void AntennaField::addAntenna(const Antenna &antenna)
+{
+    itsAntennae.push_back(antenna);
+}
+
+size_t AntennaField::nAntennae() const
+{
+    return itsAntennae.size();
+}
+
+const AntennaField::Antenna &AntennaField::antenna(size_t n) const
+{
+    return itsAntennae[n];
+}
+
+AntennaField::Antenna &AntennaField::antenna(size_t n)
+{
+    return itsAntennae[n];
+}
+
+AntennaField::AntennaList::const_iterator AntennaField::beginAntennae() const
+{
+    return itsAntennae.begin();
+}
+
+AntennaField::AntennaList::const_iterator AntennaField::endAntennae() const
+{
+    return itsAntennae.end();
+}
+
 vector3r_t AntennaField::ncp(real_t time) const
 {
     if(time != itsNCPCacheTime)
@@ -43,7 +102,7 @@ vector3r_t AntennaField::ncp(real_t time) const
     return itsNCPCacheDirection;
 }
 
-vector3r_t AntennaField::itrf2station(const vector3r_t &itrf) const
+vector3r_t AntennaField::itrf2field(const vector3r_t &itrf) const
 {
     const CoordinateSystem::Axes &axes = itsCoordinateSystem.axes;
     vector3r_t station = {{dot(axes.p, itrf), dot(axes.q, itrf),
@@ -130,7 +189,7 @@ raw_response_t AntennaField::rawResponse(real_t time, real_t freq,
     raw_array_factor_t af = rawArrayFactor(time, freq, direction, direction0);
 
     raw_response_t result;
-    result.response = singleElementResponse(time, freq, direction);
+    result.response = elementResponse(time, freq, direction);
     result.response[0][0] *= af.factor[0];
     result.response[0][1] *= af.factor[0];
     result.response[1][0] *= af.factor[1];
