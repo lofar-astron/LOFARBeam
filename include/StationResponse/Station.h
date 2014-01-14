@@ -98,6 +98,11 @@ public:
 
 
     /*!
+     *  \brief Return the number of available antenna fields.
+     */
+    size_t nFields() const;
+
+    /*!
      *  \brief Return the requested antenna field.
      *
      *  \param i Antenna field number (0-based).
@@ -105,11 +110,6 @@ public:
      *  instance, or an empty AntennaField::ConstPtr if \p i is out of bounds.
      */
     AntennaField::ConstPtr field(size_t i) const;
-
-    /*!
-     *  \brief Return the number of available antenna fields.
-     */
-    size_t nFields() const;
 
     /*!
      *  \brief Return an iterator that points to the beginning of the list of
