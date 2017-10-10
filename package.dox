@@ -1,7 +1,0 @@
-// \ingroup Calibration
-
-// \defgroup ElementResponse ElementResponse
-// The ElementResponse package contains functions to evaluate the semi-analytic
-// models of the LOFAR LBA and HBA dual dipole antenna. The implementation is
-// based on "Mathematical-physical analysis of the generic dual-dipole antenna"
-// by J.P. Hamaker.
