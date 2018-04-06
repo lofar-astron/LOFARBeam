@@ -109,6 +109,32 @@ void transformToFieldCoordinates(TileAntenna::TileConfig &config,
     }
 }
 
+AntennaField::CoordinateSystem readCoordinateSystemAartfaac(
+    const Table &table, unsigned int id)
+{
+    ROArrayQuantColumn<Double> c_position(table, "POSITION", "m");
+ 
+    // Read antenna field center (ITRF).
+    Vector<Quantity> aips_position = c_position(id);
+    assert(aips_position.size() == 3);
+
+    vector3r_t position = {{aips_position(0).getValue(),
+        aips_position(1).getValue(), aips_position(2).getValue()}};
+
+    TableRecord keywordset = table.keywordSet();
+    Matrix<double> aips_axes;
+    keywordset.get("AARTFAAC_COORDINATE_AXES", aips_axes);
+    assert(aips_axes.shape().isEqual(IPosition(2, 3, 3)));
+
+    vector3r_t p = {{aips_axes(0, 0), aips_axes(1, 0), aips_axes(2, 0)}};
+    vector3r_t q = {{aips_axes(0, 1), aips_axes(1, 1), aips_axes(2, 1)}};
+    vector3r_t r = {{aips_axes(0, 2), aips_axes(1, 2), aips_axes(2, 2)}};
+
+    AntennaField::CoordinateSystem system = {position, {p, q, r}};
+
+    return system;
+}
+
 AntennaField::CoordinateSystem readCoordinateSystem(const Table &table,
     unsigned int id)
 {
@@ -175,7 +201,7 @@ AntennaField::Ptr readAntennaField(const Table &table, unsigned int id)
         DualDipoleAntenna::Ptr model(new DualDipoleAntenna());
         field = AntennaField::Ptr(new AntennaFieldLBA(name, system, model));
     }
-    else
+    else // HBA, HBA0, HBA1
     {
         TileAntenna::TileConfig config = readTileConfig(table, id);
         transformToFieldCoordinates(config, system.axes);
@@ -185,6 +211,36 @@ AntennaField::Ptr readAntennaField(const Table &table, unsigned int id)
     }
 
     readAntennae(table, id, field);
+    return field;
+}
+
+AntennaField::Ptr readAntennaFieldAartfaac(const Table &table, const string &ant_type,
+                                           unsigned int id)
+{
+    AntennaField::Ptr field;
+    AntennaField::CoordinateSystem system = readCoordinateSystemAartfaac(table, id);
+
+    if (ant_type == "LBA")
+    {
+        DualDipoleAntenna::Ptr model(new DualDipoleAntenna());
+        field = AntennaField::Ptr(new AntennaFieldLBA(ant_type, system, model));
+    }
+    else // HBA
+    {
+         // TODO: implement this
+         throw std::runtime_error("HBA not implemented yet...");
+    }
+
+    // Add only one antenna to the field (no offset, always enabled)
+    AntennaField::Antenna antenna;
+    antenna.position[0] = 0.;
+    antenna.position[1] = 0.;
+    antenna.position[2] = 0.;
+    antenna.enabled[0] = true;
+    antenna.enabled[1] = true;
+
+    field->addAntenna(antenna);
+
     return field;
 }
 
@@ -226,12 +282,28 @@ Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
     readStationPhaseReference(ms.antenna(), id, station);
 
     // Read antenna field information.
-    Table tab_field = getSubTable(ms, "LOFAR_ANTENNA_FIELD");
-    tab_field = tab_field(tab_field.col("ANTENNA_ID") == static_cast<Int>(id));
+    ROScalarColumn<String> telescope_name_col(getSubTable(ms, "OBSERVATION"),
+                                              "TELESCOPE_NAME");
+    string telescope_name = telescope_name_col(0);
 
-    for(size_t i = 0; i < tab_field.nrow(); ++i)
+    if (telescope_name == "LOFAR")
     {
-        station->addField(readAntennaField(tab_field, i));
+        Table tab_field = getSubTable(ms, "LOFAR_ANTENNA_FIELD");
+        tab_field = tab_field(tab_field.col("ANTENNA_ID") == static_cast<Int>(id));
+
+        for(size_t i = 0; i < tab_field.nrow(); ++i)
+        {
+            station->addField(readAntennaField(tab_field, i));
+        }
+    }
+    else if (telescope_name == "AARTFAAC")
+    {
+        ROScalarColumn<String> ant_type_col(getSubTable(ms, "OBSERVATION"),
+                                            "AARTFAAC_ANTENNA_TYPE");
+        string ant_type = ant_type_col(0);
+
+        Table tab_field = getSubTable(ms, "ANTENNA");
+        station -> addField(readAntennaFieldAartfaac(tab_field, ant_type, id));
     }
 
     return station;
