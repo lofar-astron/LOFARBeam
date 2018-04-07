@@ -37,6 +37,8 @@
 #include <measures/Measures/MeasConvert.h>
 #include <measures/TableMeasures/ScalarMeasColumn.h>
 
+#include <stdexcept>
+
 #include <ms/MeasurementSets/MSAntenna.h>
 #if defined(casacore)
 #include <ms/MSSel/MSSelection.h>
@@ -228,7 +230,7 @@ AntennaField::Ptr readAntennaFieldAartfaac(const Table &table, const string &ant
     else // HBA
     {
          // TODO: implement this
-         throw std::runtime_error("HBA not implemented yet...");
+         throw std::runtime_error("HBA for Aartfaac is not implemented yet.");
     }
 
     // Add only one antenna to the field (no offset, always enabled)
