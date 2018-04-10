@@ -311,5 +311,30 @@ Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
     return station;
 }
 
+MDirection readTileBeamDirection(const casa::MeasurementSet &ms) {
+    MDirection tileBeamDir;
+
+    Table fieldTable = getSubTable(ms, "FIELD");
+
+    if (fieldTable.nrow() != 1) {
+        throw std::runtime_error("MS has multiple fields, this does not work with the LOFAR beam library.");
+    }
+
+    if (hasColumn(fieldTable, "LOFAR_TILE_BEAM_DIR"))
+    {
+        ROArrayMeasColumn<MDirection> tileBeamCol(fieldTable,
+                                                  "LOFAR_TILE_BEAM_DIR");
+        tileBeamDir = *(tileBeamCol(0).data());
+    }
+    else
+    {
+      ROArrayMeasColumn<MDirection> tileBeamCol(fieldTable,
+                                                "DELAY_CENTER");
+      tileBeamDir = *(tileBeamCol(0).data());
+    }
+
+    return tileBeamDir;
+}
+
 } //# namespace StationResponse
 } //# namespace LOFAR

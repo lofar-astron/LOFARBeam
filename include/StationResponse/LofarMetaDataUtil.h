@@ -31,6 +31,7 @@
 #include <StationResponse/Station.h>
 #include <ms/MeasurementSets/MeasurementSet.h>
 #include <ms/MeasurementSets/MSAntennaColumns.h>
+#include <measures/Measures/MDirection.h>
 
 namespace LOFAR
 {
@@ -51,6 +52,10 @@ void readStations(const casa::MeasurementSet &ms, T out_it)
         *out_it++ = readStation(ms, i);
     }
 }
+
+// Read the tile beam direction from a LOFAR MS. If it is not defined,
+// this function returns the delay center.
+casa::MDirection readTileBeamDirection(const casa::MeasurementSet &ms);
 
 // @}
 
