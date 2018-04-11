@@ -329,7 +329,7 @@ MDirection readTileBeamDirection(const casa::MeasurementSet &ms) {
     else
     {
       ROArrayMeasColumn<MDirection> tileBeamCol(fieldTable,
-                                                "DELAY_CENTER");
+                                                "DELAY_DIR");
       tileBeamDir = *(tileBeamCol(0).data());
     }
 
