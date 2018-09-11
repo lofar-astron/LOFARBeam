@@ -29,42 +29,37 @@
 #include <StationResponse/TileAntenna.h>
 #include <StationResponse/DualDipoleAntenna.h>
 
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MPosition.h>
-#include <measures/Measures/MCDirection.h>
-#include <measures/Measures/MCPosition.h>
-#include <measures/Measures/MeasTable.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/TableMeasures/ScalarMeasColumn.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MPosition.h>
+#include <casacore/measures/Measures/MCDirection.h>
+#include <casacore/measures/Measures/MCPosition.h>
+#include <casacore/measures/Measures/MeasTable.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/TableMeasures/ScalarMeasColumn.h>
 
 #include <stdexcept>
 
-#include <ms/MeasurementSets/MSAntenna.h>
-#if defined(casacore)
-#include <ms/MSSel/MSSelection.h>
-#include <ms/MSSel/MSAntennaParse.h>
-#else
-#include <ms/MeasurementSets/MSSelection.h>
-#include <ms/MeasurementSets/MSAntennaParse.h>
-#endif
-#include <ms/MeasurementSets/MSAntennaColumns.h>
-#include <ms/MeasurementSets/MSDataDescription.h>
-#include <ms/MeasurementSets/MSDataDescColumns.h>
-#include <ms/MeasurementSets/MSField.h>
-#include <ms/MeasurementSets/MSFieldColumns.h>
-#include <ms/MeasurementSets/MSObservation.h>
-#include <ms/MeasurementSets/MSObsColumns.h>
-#include <ms/MeasurementSets/MSPolarization.h>
-#include <ms/MeasurementSets/MSPolColumns.h>
-#include <ms/MeasurementSets/MSSpectralWindow.h>
-#include <ms/MeasurementSets/MSSpWindowColumns.h>
+#include <casacore/ms/MeasurementSets/MSAntenna.h>
+#include <casacore/ms/MSSel/MSSelection.h>
+#include <casacore/ms/MSSel/MSAntennaParse.h>
+#include <casacore/ms/MeasurementSets/MSAntennaColumns.h>
+#include <casacore/ms/MeasurementSets/MSDataDescription.h>
+#include <casacore/ms/MeasurementSets/MSDataDescColumns.h>
+#include <casacore/ms/MeasurementSets/MSField.h>
+#include <casacore/ms/MeasurementSets/MSFieldColumns.h>
+#include <casacore/ms/MeasurementSets/MSObservation.h>
+#include <casacore/ms/MeasurementSets/MSObsColumns.h>
+#include <casacore/ms/MeasurementSets/MSPolarization.h>
+#include <casacore/ms/MeasurementSets/MSPolColumns.h>
+#include <casacore/ms/MeasurementSets/MSSpectralWindow.h>
+#include <casacore/ms/MeasurementSets/MSSpWindowColumns.h>
 
 namespace LOFAR
 {
 namespace StationResponse
 {
 
-using namespace casa;
+using namespace casacore;
 
 bool hasColumn(const Table &table, const string &column)
 {
@@ -311,7 +306,7 @@ Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
     return station;
 }
 
-MDirection readTileBeamDirection(const casa::MeasurementSet &ms) {
+MDirection readTileBeamDirection(const casacore::MeasurementSet &ms) {
     MDirection tileBeamDir;
 
     Table fieldTable = getSubTable(ms, "FIELD");

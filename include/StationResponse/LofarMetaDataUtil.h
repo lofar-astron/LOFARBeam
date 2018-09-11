@@ -29,9 +29,9 @@
 // LOFAR observations stored in MS format.
 
 #include <StationResponse/Station.h>
-#include <ms/MeasurementSets/MeasurementSet.h>
-#include <ms/MeasurementSets/MSAntennaColumns.h>
-#include <measures/Measures/MDirection.h>
+#include <casacore/ms/MeasurementSets/MeasurementSet.h>
+#include <casacore/ms/MeasurementSets/MSAntennaColumns.h>
+#include <casacore/measures/Measures/MDirection.h>
 
 namespace LOFAR
 {
@@ -41,12 +41,12 @@ namespace StationResponse
 // \addtogroup StationResponse
 // @{
 
-Station::Ptr readStation(const casa::MeasurementSet &ms, unsigned int id);
+Station::Ptr readStation(const casacore::MeasurementSet &ms, unsigned int id);
 
 template <typename T>
-void readStations(const casa::MeasurementSet &ms, T out_it)
+void readStations(const casacore::MeasurementSet &ms, T out_it)
 {
-    casa::ROMSAntennaColumns antenna(ms.antenna());
+    casacore::ROMSAntennaColumns antenna(ms.antenna());
     for(unsigned int i = 0; i < antenna.nrow(); ++i)
     {
         *out_it++ = readStation(ms, i);
@@ -55,7 +55,7 @@ void readStations(const casa::MeasurementSet &ms, T out_it)
 
 // Read the tile beam direction from a LOFAR MS. If it is not defined,
 // this function returns the delay center.
-casa::MDirection readTileBeamDirection(const casa::MeasurementSet &ms);
+casacore::MDirection readTileBeamDirection(const casacore::MeasurementSet &ms);
 
 // @}
 

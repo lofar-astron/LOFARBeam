@@ -26,7 +26,7 @@
 #include <StationResponse/Constants.h>
 #include <StationResponse/MathUtil.h>
 #include <ElementResponse/ElementResponse.h>
-#include <measures/Measures/MeasFrame.h>
+#include <casacore/measures/Measures/MeasFrame.h>
 
 namespace LOFAR
 {

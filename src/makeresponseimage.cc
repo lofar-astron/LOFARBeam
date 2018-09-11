@@ -30,33 +30,33 @@
 #include <Common/LofarLogger.h>
 #include <Common/SystemUtil.h>
 #include <Common/Version.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <coordinates/Coordinates/StokesCoordinate.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
-#include <images/Images/PagedImage.h>
-#include <measures/Measures/MCDirection.h>
-#include <measures/Measures/MCPosition.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MeasTable.h>
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MPosition.h>
-#include <ms/MeasurementSets/MeasurementSet.h>
-#include <ms/MeasurementSets/MSDataDescription.h>
-#include <ms/MeasurementSets/MSDataDescColumns.h>
-#include <ms/MeasurementSets/MSField.h>
-#include <ms/MeasurementSets/MSFieldColumns.h>
-#include <ms/MeasurementSets/MSObservation.h>
-#include <ms/MeasurementSets/MSObsColumns.h>
-#include <ms/MeasurementSets/MSSpectralWindow.h>
-#include <ms/MeasurementSets/MSSpWindowColumns.h>
-#include <tables/Tables/ExprNode.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
+#include <casacore/coordinates/Coordinates/StokesCoordinate.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/measures/Measures/MCDirection.h>
+#include <casacore/measures/Measures/MCPosition.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MeasTable.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MPosition.h>
+#include <casacore/ms/MeasurementSets/MeasurementSet.h>
+#include <casacore/ms/MeasurementSets/MSDataDescription.h>
+#include <casacore/ms/MeasurementSets/MSDataDescColumns.h>
+#include <casacore/ms/MeasurementSets/MSField.h>
+#include <casacore/ms/MeasurementSets/MSFieldColumns.h>
+#include <casacore/ms/MeasurementSets/MSObservation.h>
+#include <casacore/ms/MeasurementSets/MSObsColumns.h>
+#include <casacore/ms/MeasurementSets/MSSpectralWindow.h>
+#include <casacore/ms/MeasurementSets/MSSpWindowColumns.h>
+#include <casacore/tables/Tables/ExprNode.h>
 
 // There is no wrapped include file lofar_iterator.h.
 #include <iterator>
 
-using namespace casa;
+using namespace casacore;
 using namespace LOFAR;
 using namespace LOFAR::StationResponse;
 using LOFAR::operator<<;
@@ -131,18 +131,18 @@ namespace
 
     /*!
      *  \brief Convert an ITRF position given as a StationResponse::vector3r_t
-     *  instance to a casa::MPosition.
+     *  instance to a casacore::MPosition.
      */
     MPosition toMPositionITRF(const vector3r_t &position);
 
     /*!
-     *  \brief Convert a casa::MPosition instance to a
+     *  \brief Convert a casacore::MPosition instance to a
      *  StationResponse::vector3r_t instance.
      */
     vector3r_t fromMPosition(const MPosition &position);
 
     /*!
-     *  \brief Convert a casa::MDirection instance to a
+     *  \brief Convert a casacore::MDirection instance to a
      *  StationResponse::vector3r_t instance.
      */
     vector3r_t fromMDirection(const MDirection &direction);

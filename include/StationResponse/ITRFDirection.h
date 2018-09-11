@@ -29,9 +29,9 @@
 #include <StationResponse/Types.h>
 #include <Common/lofar_smartptr.h>
 
-#include <measures/Measures/MeasFrame.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MCDirection.h>
+#include <casacore/measures/Measures/MeasFrame.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MCDirection.h>
 
 namespace LOFAR
 {
@@ -53,8 +53,8 @@ public:
     vector3r_t at(real_t time) const;
 
 private:
-    mutable casa::MeasFrame             itsFrame;
-    mutable casa::MDirection::Convert   itsConverter;
+    mutable casacore::MeasFrame             itsFrame;
+    mutable casacore::MDirection::Convert   itsConverter;
 };
 
 // @}

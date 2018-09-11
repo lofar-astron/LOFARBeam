@@ -23,9 +23,9 @@
 #include <lofar_config.h>
 #include <StationResponse/ITRFDirection.h>
 
-#include <measures/Measures/MPosition.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MPosition.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MEpoch.h>
 
 namespace LOFAR
 {
@@ -35,39 +35,39 @@ namespace StationResponse
 ITRFDirection::ITRFDirection(const vector3r_t &position,
     const vector2r_t &direction)
 {
-    casa::MVPosition mvPosition(position[0], position[1], position[2]);
-    casa::MPosition mPosition(mvPosition, casa::MPosition::ITRF);
-    itsFrame = casa::MeasFrame(casa::MEpoch(), mPosition);
+    casacore::MVPosition mvPosition(position[0], position[1], position[2]);
+    casacore::MPosition mPosition(mvPosition, casacore::MPosition::ITRF);
+    itsFrame = casacore::MeasFrame(casacore::MEpoch(), mPosition);
 
     // Order of angles seems to be longitude (along the equator), lattitude
     // (towards the pole).
-    casa::MVDirection mvDirection(direction[0], direction[1]);
-    casa::MDirection mDirection(mvDirection, casa::MDirection::J2000);
-    itsConverter = casa::MDirection::Convert(mDirection,
-        casa::MDirection::Ref(casa::MDirection::ITRF, itsFrame));
+    casacore::MVDirection mvDirection(direction[0], direction[1]);
+    casacore::MDirection mDirection(mvDirection, casacore::MDirection::J2000);
+    itsConverter = casacore::MDirection::Convert(mDirection,
+        casacore::MDirection::Ref(casacore::MDirection::ITRF, itsFrame));
 }
 
 ITRFDirection::ITRFDirection(const vector3r_t &position,
     const vector3r_t &direction)
 {
-    casa::MVPosition mvPosition(position[0], position[1], position[2]);
-    casa::MPosition mPosition(mvPosition, casa::MPosition::ITRF);
-    itsFrame = casa::MeasFrame(casa::MEpoch(), mPosition);
+    casacore::MVPosition mvPosition(position[0], position[1], position[2]);
+    casacore::MPosition mPosition(mvPosition, casacore::MPosition::ITRF);
+    itsFrame = casacore::MeasFrame(casacore::MEpoch(), mPosition);
 
-    casa::MVDirection mvDirection(direction[0], direction[1], direction[2]);
-    casa::MDirection mDirection(mvDirection, casa::MDirection::J2000);
-    itsConverter = casa::MDirection::Convert(mDirection,
-        casa::MDirection::Ref(casa::MDirection::ITRF, itsFrame));
+    casacore::MVDirection mvDirection(direction[0], direction[1], direction[2]);
+    casacore::MDirection mDirection(mvDirection, casacore::MDirection::J2000);
+    itsConverter = casacore::MDirection::Convert(mDirection,
+        casacore::MDirection::Ref(casacore::MDirection::ITRF, itsFrame));
 }
 
 vector3r_t ITRFDirection::at(real_t time) const
 {
     // Cannot use MeasFrame::resetEpoch(Double), because that assumes the
     // argument is UTC in (fractional) days (MJD).
-    itsFrame.resetEpoch(casa::Quantity(time, "s"));
+    itsFrame.resetEpoch(casacore::Quantity(time, "s"));
 
-    const casa::MDirection &mITRF = itsConverter();
-    const casa::MVDirection &mvITRF = mITRF.getValue();
+    const casacore::MDirection &mITRF = itsConverter();
+    const casacore::MVDirection &mvITRF = mITRF.getValue();
 
     vector3r_t itrf = {{mvITRF(0), mvITRF(1), mvITRF(2)}};
     return itrf;
