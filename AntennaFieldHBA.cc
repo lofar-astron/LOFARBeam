@@ -20,9 +20,8 @@
 //#
 //# $Id$
 
-#include <lofar_config.h>
-#include <StationResponse/AntennaFieldHBA.h>
-#include <StationResponse/MathUtil.h>
+#include "AntennaFieldHBA.h"
+#include "MathUtil.h"
 
 namespace LOFAR
 {

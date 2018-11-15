@@ -28,7 +28,8 @@
 // Utility functions to read the meta data relevant for simulating the beam from
 // LOFAR observations stored in MS format.
 
-#include <StationResponse/Station.h>
+#include "Station.h"
+
 #include <casacore/ms/MeasurementSets/MeasurementSet.h>
 #include <casacore/ms/MeasurementSets/MSAntennaColumns.h>
 #include <casacore/measures/Measures/MDirection.h>

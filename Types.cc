@@ -20,8 +20,7 @@
 //#
 //# $Id$
 
-#include <lofar_config.h>
-#include <StationResponse/Types.h>
+#include "Types.h"
 
 namespace LOFAR
 {

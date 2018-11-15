@@ -26,8 +26,10 @@
 // \file
 // Types used in this library.
 
-#include <Common/lofar_complex.h>
-#include <Common/StreamUtil.h>
+//#include <Common/StreamUtil.h>
+#include <cstring>
+#include <ostream>
+#include <complex>
 
 namespace LOFAR
 {
@@ -112,13 +114,13 @@ struct static_array
 
 /** Print the contents of a static array. */
 template <typename T, size_t N>
-ostream &operator<<(ostream &out, const static_array<T,N> &obj);
+std::ostream &operator<<(std::ostream &out, const static_array<T,N> &obj);
 
 /** Type used for real scalars. */
 typedef double                                      real_t;
 
 /** Type used for complex scalars. */
-typedef dcomplex                                    complex_t;
+typedef std::complex<double>                        complex_t;
 
 /** Type used for 2-dimensional real vectors. */
 typedef static_array<real_t, 2>                     vector2r_t;
@@ -222,7 +224,7 @@ inline size_t static_array<T, N>::size()
 }
 
 template <typename T, size_t N>
-ostream &operator<<(ostream &out, const static_array<T,N> &obj)
+std::ostream &operator<<(std::ostream &out, const static_array<T,N> &obj)
 {
   print(out, obj.begin(), obj.end());
   return out;

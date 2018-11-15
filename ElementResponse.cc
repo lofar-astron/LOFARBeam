@@ -21,8 +21,8 @@
 //#
 //# $Id$
 
-#include <lofar_config.h>
-#include <ElementResponse/ElementResponse.h>
+#include "ElementResponse.h"
+
 #include <cmath>
 
 // The coefficients are kept in an unnamed namespace which effectively makes

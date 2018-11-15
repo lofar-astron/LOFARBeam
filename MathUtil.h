@@ -26,9 +26,8 @@
 // \file
 // Various mathematical operations on vectors and matrices.
 
-#include <StationResponse/Constants.h>
-#include <StationResponse/Types.h>
-#include <Common/lofar_math.h>
+#include "Constants.h"
+#include "Types.h"
 
 namespace LOFAR
 {

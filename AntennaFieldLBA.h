@@ -26,8 +26,8 @@
 // \file
 // Representation of an LBA antenna field.
 
-#include <StationResponse/AntennaField.h>
-#include <StationResponse/AntennaModelLBA.h>
+#include "AntennaField.h"
+#include "AntennaModelLBA.h"
 
 namespace LOFAR
 {
@@ -40,8 +40,8 @@ namespace StationResponse
 class AntennaFieldLBA: public AntennaField
 {
 public:
-    typedef shared_ptr<AntennaFieldLBA>         Ptr;
-    typedef shared_ptr<const AntennaFieldLBA>   ConstPtr;
+    typedef std::shared_ptr<AntennaFieldLBA>         Ptr;
+    typedef std::shared_ptr<const AntennaFieldLBA>   ConstPtr;
 
     AntennaFieldLBA(const string &name, const CoordinateSystem &coordinates,
         const AntennaModelLBA::ConstPtr &model);

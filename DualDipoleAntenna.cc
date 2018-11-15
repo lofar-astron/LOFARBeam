@@ -21,11 +21,10 @@
 //#
 //# $Id$
 
-#include <lofar_config.h>
-#include <StationResponse/DualDipoleAntenna.h>
-#include <StationResponse/Constants.h>
-#include <StationResponse/MathUtil.h>
-#include <ElementResponse/ElementResponse.h>
+#include "DualDipoleAntenna.h"
+#include "Constants.h"
+#include "MathUtil.h"
+#include "ElementResponse.h"
 
 namespace LOFAR
 {

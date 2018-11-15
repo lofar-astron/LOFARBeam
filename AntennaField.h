@@ -28,12 +28,9 @@
 // Representation of a LOFAR antenna field, with methods to compute its response
 // to incoming radiation.
 
-#include <Common/lofar_smartptr.h>
-#include <Common/lofar_string.h>
-#include <Common/lofar_vector.h>
-#include <StationResponse/Constants.h>
-#include <StationResponse/Types.h>
-#include <StationResponse/ITRFDirection.h>
+#include "Constants.h"
+#include "Types.h"
+#include "ITRFDirection.h"
 
 namespace LOFAR
 {
@@ -49,8 +46,8 @@ namespace StationResponse
 class AntennaField
 {
 public:
-    typedef shared_ptr<AntennaField>        Ptr;
-    typedef shared_ptr<const AntennaField>  ConstPtr;
+    typedef std::shared_ptr<AntennaField>        Ptr;
+    typedef std::shared_ptr<const AntennaField>  ConstPtr;
 
     /**
      *  \brief Antenna field coordinate system.

@@ -26,12 +26,13 @@
 // \file
 // Functor that maps time to an ITRF direction.
 
-#include <StationResponse/Types.h>
-#include <Common/lofar_smartptr.h>
+#include "Types.h"
 
 #include <casacore/measures/Measures/MeasFrame.h>
 #include <casacore/measures/Measures/MeasConvert.h>
 #include <casacore/measures/Measures/MCDirection.h>
+
+#include <memory>
 
 namespace LOFAR
 {
@@ -44,8 +45,8 @@ namespace StationResponse
 class ITRFDirection
 {
 public:
-    typedef shared_ptr<ITRFDirection>       Ptr;
-    typedef shared_ptr<const ITRFDirection> ConstPtr;
+    typedef std::shared_ptr<ITRFDirection>       Ptr;
+    typedef std::shared_ptr<const ITRFDirection> ConstPtr;
 
     ITRFDirection(const vector3r_t &position, const vector2r_t &direction);
     ITRFDirection(const vector3r_t &position, const vector3r_t &direction);

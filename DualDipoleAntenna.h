@@ -27,7 +27,9 @@
 // \file
 // Semi-analytical model of a LOFAR LBA dual dipole antenna.
 
-#include <StationResponse/AntennaModelLBA.h>
+#include "AntennaModelLBA.h"
+
+#include <memory>
 
 namespace LOFAR
 {
@@ -40,8 +42,8 @@ namespace StationResponse
 class DualDipoleAntenna: public AntennaModelLBA
 {
 public:
-    typedef shared_ptr<DualDipoleAntenna>       Ptr;
-    typedef shared_ptr<const DualDipoleAntenna> ConstPtr;
+    typedef std::shared_ptr<DualDipoleAntenna>       Ptr;
+    typedef std::shared_ptr<const DualDipoleAntenna> ConstPtr;
 
     virtual matrix22c_t response(real_t freq, const vector3r_t &direction)
         const;

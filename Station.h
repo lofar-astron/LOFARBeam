@@ -26,11 +26,11 @@
 // \file
 // Representation of the station beam former.
 
-#include <Common/lofar_smartptr.h>
-#include <Common/lofar_string.h>
-#include <Common/lofar_vector.h>
-#include <StationResponse/AntennaField.h>
-#include <StationResponse/Types.h>
+#include "AntennaField.h"
+#include "Types.h"
+
+#include <memory>
+#include <vector>
 
 namespace LOFAR
 {
@@ -43,9 +43,9 @@ namespace StationResponse
 class Station
 {
 public:
-    typedef shared_ptr<Station>             Ptr;
-    typedef shared_ptr<const Station>       ConstPtr;
-    typedef vector<AntennaField::ConstPtr>  FieldList;
+    typedef std::shared_ptr<Station>             Ptr;
+    typedef std::shared_ptr<const Station>       ConstPtr;
+    typedef std::vector<AntennaField::ConstPtr>  FieldList;
 
     /*!
      *  \brief Construct a new Station instance.

@@ -26,7 +26,9 @@
 // \file
 // Semi-analytical model of a LOFAR HBA tile.
 
-#include <StationResponse/AntennaModelHBA.h>
+#include "AntennaModelHBA.h"
+
+#include <memory>
 
 namespace LOFAR
 {
@@ -39,8 +41,8 @@ namespace StationResponse
 class TileAntenna: public AntennaModelHBA
 {
 public:
-    typedef shared_ptr<TileAntenna>         Ptr;
-    typedef shared_ptr<const TileAntenna>   ConstPtr;
+    typedef std::shared_ptr<TileAntenna>         Ptr;
+    typedef std::shared_ptr<const TileAntenna>   ConstPtr;
 
     typedef static_array<vector3r_t, 16>    TileConfig;
 

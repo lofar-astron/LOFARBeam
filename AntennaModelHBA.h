@@ -26,8 +26,9 @@
 // \file
 // HBA antenna model interface definitions.
 
-#include <StationResponse/Types.h>
-#include <Common/lofar_smartptr.h>
+#include "Types.h"
+
+#include <memory>
 
 namespace LOFAR
 {
@@ -40,8 +41,8 @@ namespace StationResponse
 class AntennaModelHBA
 {
 public:
-    typedef shared_ptr<AntennaModelHBA>         Ptr;
-    typedef shared_ptr<const AntennaModelHBA>   ConstPtr;
+    typedef std::shared_ptr<AntennaModelHBA>         Ptr;
+    typedef std::shared_ptr<const AntennaModelHBA>   ConstPtr;
 
     virtual ~AntennaModelHBA();
 

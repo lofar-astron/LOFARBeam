@@ -21,11 +21,11 @@
 //#
 //# $Id$
 
-#include <lofar_config.h>
-#include <StationResponse/AntennaField.h>
-#include <StationResponse/Constants.h>
-#include <StationResponse/MathUtil.h>
-#include <ElementResponse/ElementResponse.h>
+#include "AntennaField.h"
+#include "Constants.h"
+#include "MathUtil.h"
+#include "ElementResponse.h"
+
 #include <casacore/measures/Measures/MeasFrame.h>
 
 namespace LOFAR

@@ -26,7 +26,7 @@
 // \file
 // %Constants used in this library.
 
-#include <StationResponse/Types.h>
+#include "Types.h"
 
 namespace LOFAR
 {

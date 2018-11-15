@@ -21,13 +21,12 @@
 //#
 //# $Id$
 
-#include <lofar_config.h>
-#include <StationResponse/LofarMetaDataUtil.h>
-#include <StationResponse/AntennaFieldLBA.h>
-#include <StationResponse/AntennaFieldHBA.h>
-#include <StationResponse/MathUtil.h>
-#include <StationResponse/TileAntenna.h>
-#include <StationResponse/DualDipoleAntenna.h>
+#include "LofarMetaDataUtil.h"
+#include "AntennaFieldLBA.h"
+#include "AntennaFieldHBA.h"
+#include "MathUtil.h"
+#include "TileAntenna.h"
+#include "DualDipoleAntenna.h"
 
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/measures/Measures/MPosition.h>
@@ -37,6 +36,7 @@
 #include <casacore/measures/Measures/MeasConvert.h>
 #include <casacore/measures/TableMeasures/ScalarMeasColumn.h>
 
+#include <cassert>
 #include <stdexcept>
 
 #include <casacore/ms/MeasurementSets/MSAntenna.h>
@@ -60,6 +60,7 @@ namespace StationResponse
 {
 
 using namespace casacore;
+using namespace std;
 
 bool hasColumn(const Table &table, const string &column)
 {

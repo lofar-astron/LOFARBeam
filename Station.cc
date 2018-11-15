@@ -20,9 +20,8 @@
 //#
 //# $Id$
 
-#include <lofar_config.h>
-#include <StationResponse/Station.h>
-#include <StationResponse/MathUtil.h>
+#include "Station.h"
+#include "MathUtil.h"
 
 namespace LOFAR
 {

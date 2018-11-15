@@ -20,11 +20,10 @@
 //#
 //# $Id$
 
-#include <lofar_config.h>
-#include <StationResponse/TileAntenna.h>
-#include <StationResponse/Constants.h>
-#include <StationResponse/MathUtil.h>
-#include <ElementResponse/ElementResponse.h>
+#include "TileAntenna.h"
+#include "Constants.h"
+#include "MathUtil.h"
+#include "ElementResponse.h"
 
 namespace LOFAR
 {
