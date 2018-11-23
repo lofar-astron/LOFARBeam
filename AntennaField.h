@@ -105,7 +105,7 @@ public:
         bool        enabled[2];
     };
 
-    typedef vector<Antenna> AntennaList;
+    typedef std::vector<Antenna> AntennaList;
 
 
     AntennaField(const string &name, const CoordinateSystem &coordinates);
