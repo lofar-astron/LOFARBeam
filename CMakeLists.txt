@@ -4,10 +4,11 @@ project(lofarbeam)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 
-SET(CASACORE_MAKE_REQUIRED_EXTERNALS_OPTIONAL TRUE)
-find_package(Casacore REQUIRED COMPONENTS casa measures ms tables images coordinates)
+set(CASACORE_MAKE_REQUIRED_EXTERNALS_OPTIONAL TRUE)
+find_package(Casacore REQUIRED COMPONENTS casa ms tables measures)
+include_directories(${CASACORE_INCLUDE_DIR})
 
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++11 -Wall -DNDEBUG)
 
 add_library(stationresponse SHARED
   AntennaField.cc
@@ -26,6 +27,9 @@ add_library(stationresponse SHARED
 
 add_library(elementresponse SHARED
   ElementResponse.cc)
+
+target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
+target_link_libraries(elementresponse ${CASACORE_LIBRARIES})
 
 install (TARGETS stationresponse DESTINATION lib)
 install (TARGETS elementresponse DESTINATION lib)
