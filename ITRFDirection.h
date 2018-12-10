@@ -50,12 +50,15 @@ public:
 
     ITRFDirection(const vector3r_t &position, const vector2r_t &direction);
     ITRFDirection(const vector3r_t &position, const vector3r_t &direction);
+    ITRFDirection(const vector2r_t &direction);
+    ITRFDirection(const vector3r_t &direction);
 
     vector3r_t at(real_t time) const;
 
 private:
     mutable casacore::MeasFrame             itsFrame;
     mutable casacore::MDirection::Convert   itsConverter;
+    const vector3r_t Lofarposition  = {{826577.022720000,461022.995082000,5064892.814}}; //ITRF position of CS002LBA, just to use a fixed reference
 };
 
 // @}
