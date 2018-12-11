@@ -19,6 +19,7 @@ add_library(stationresponse SHARED
   DualDipoleAntenna.cc
   ElementResponse.cc
   ITRFDirection.cc
+  Dir2ITRF.cc
   LofarMetaDataUtil.cc
   MathUtil.cc
   Station.cc
@@ -27,6 +28,7 @@ add_library(stationresponse SHARED
 
 add_library(elementresponse SHARED
   ElementResponse.cc)
+
 
 target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
 target_link_libraries(elementresponse ${CASACORE_LIBRARIES})
@@ -41,6 +43,7 @@ install (FILES
   Station.h
   Types.h
   ITRFDirection.h
+  Dir2ITRF.h
 DESTINATION include/StationResponse)
 
 install (FILES

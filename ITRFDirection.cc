@@ -30,6 +30,8 @@ namespace LOFAR
 {
 namespace StationResponse
 {
+  //TODO: initialize converter with a time (and fixed position) and convert specific directions. Needed for wslean as well as for the makestationresponse executable.
+
 
 ITRFDirection::ITRFDirection(const vector3r_t &position,
     const vector2r_t &direction)
@@ -46,19 +48,10 @@ ITRFDirection::ITRFDirection(const vector3r_t &position,
         casacore::MDirection::Ref(casacore::MDirection::ITRF, itsFrame));
 }
 
-ITRFDirection::ITRFDirection(const vector2r_t &direction)
+ITRFDirection::ITRFDirection(const vector2r_t &direction):
+  ITRFDirection(lofarposition, direction)
 {
     //create ITRF Direction from fixed stationposition
-    casacore::MVPosition mvPosition(Lofarposition[0], Lofarposition[1], Lofarposition[2]);
-    casacore::MPosition mPosition(mvPosition, casacore::MPosition::ITRF);
-    itsFrame = casacore::MeasFrame(casacore::MEpoch(), mPosition);
-
-    // Order of angles seems to be longitude (along the equator), lattitude
-    // (towards the pole).
-    casacore::MVDirection mvDirection(direction[0], direction[1]);
-    casacore::MDirection mDirection(mvDirection, casacore::MDirection::J2000);
-    itsConverter = casacore::MDirection::Convert(mDirection,
-        casacore::MDirection::Ref(casacore::MDirection::ITRF, itsFrame));
 }
 
 ITRFDirection::ITRFDirection(const vector3r_t &position,
@@ -74,18 +67,13 @@ ITRFDirection::ITRFDirection(const vector3r_t &position,
         casacore::MDirection::Ref(casacore::MDirection::ITRF, itsFrame));
 }
 
-ITRFDirection::ITRFDirection(const vector3r_t &direction){
-    //create ITRF Direction from fixed stationposition
-    casacore::MVPosition mvPosition(Lofarposition[0], Lofarposition[1], Lofarposition[2]);
-    casacore::MPosition mPosition(mvPosition, casacore::MPosition::ITRF);
-    itsFrame = casacore::MeasFrame(casacore::MEpoch(), mPosition);
+ITRFDirection::ITRFDirection(const vector3r_t &direction):
+  ITRFDirection(lofarposition,direction)
 
-    casacore::MVDirection mvDirection(direction[0], direction[1], direction[2]);
-    casacore::MDirection mDirection(mvDirection, casacore::MDirection::J2000);
-    itsConverter = casacore::MDirection::Convert(mDirection,
-        casacore::MDirection::Ref(casacore::MDirection::ITRF, itsFrame));
-   
+{
+    //create ITRF Direction from fixed stationposition
 }
+
 
 vector3r_t ITRFDirection::at(real_t time) const
 {
@@ -99,6 +87,7 @@ vector3r_t ITRFDirection::at(real_t time) const
     vector3r_t itrf = {{mvITRF(0), mvITRF(1), mvITRF(2)}};
     return itrf;
 }
+
 
 } //# namespace StationResponse
 } //# namespace LOFAR

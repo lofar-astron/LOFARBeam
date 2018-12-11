@@ -20,11 +20,11 @@
 //#
 //# $Id$
 
-#ifndef LOFAR_STATIONRESPONSE_ITRFDIRECTION_H
-#define LOFAR_STATIONRESPONSE_ITRFDIRECTION_H
+#ifndef LOFAR_STATIONRESPONSE_DIR2ITRF_H
+#define LOFAR_STATIONRESPONSE_DIR2ITRF_H
 
 // \file
-// Functor that maps time to an ITRF direction.
+// Functor that maps J2000 to an ITRF direction.
 
 #include "Types.h"
 
@@ -41,22 +41,23 @@ namespace StationResponse
 
 // \addtogroup StationResponse
 // @{
-const vector3r_t lofarposition  = {{826577.022720000,461022.995082000,5064892.814}}; //ITRF position of CS002LBA, just to use a fixed reference
 
-class ITRFDirection
+class Dir2ITRF
 {
 public:
     typedef std::shared_ptr<ITRFDirection>       Ptr;
     typedef std::shared_ptr<const ITRFDirection> ConstPtr;
 
-    ITRFDirection(const vector3r_t &position, const vector2r_t &direction);
-    ITRFDirection(const vector3r_t &position, const vector3r_t &direction);
-    ITRFDirection(const vector2r_t &direction);
-    ITRFDirection(const vector3r_t &direction);
-
-    vector3r_t at(real_t time) const;
-
+    Dir2ITRF(real_t time);
     
+    void setTime(real_t time);
+    vector3r_t convert_v(const vector2r_t &direction) const;
+    vector3r_t convert_v(const vector3r_t &direction) const;
+    vector3r_t convert_v(const casa::MDirection &direction) const;
+    casa::MDirection convert(const vector2r_t &direction) const;
+    casa::MDirection convert(const vector3r_t &direction) const;
+    casa::MDirection convert(const casa::MDirection &direction) const;
+
 
 private:
     mutable casacore::MeasFrame             itsFrame;

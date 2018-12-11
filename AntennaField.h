@@ -170,7 +170,7 @@ public:
      *  wave arrives.
      */
     virtual matrix22c_t response(real_t time, real_t freq,
-        const vector3r_t &direction, const vector3r_t &direction0) const;
+        const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const;
 
     /*!
      *  \brief Compute the array factor of the antenna field for a plane wave of
@@ -206,7 +206,7 @@ public:
      *  const vector3r_t &direction0) const
      */
     virtual raw_response_t rawResponse(real_t time, real_t freq,
-        const vector3r_t &direction, const vector3r_t &direction0) const;
+        const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const;
 
     /*!
      *  \brief Compute the array factor of the antenna field for a plane wave of
@@ -230,7 +230,7 @@ public:
      *
      */
     virtual matrix22c_t elementResponse(real_t time, real_t freq,
-        const vector3r_t &direction) const = 0;
+        const vector3r_t &direction, const bool rotate) const = 0;
 
 protected:
     /** Compute the parallactic rotation. */
@@ -241,13 +241,16 @@ protected:
 
 private:
     vector3r_t ncp(real_t time) const;
-
+    vector3r_t ncppol0(real_t time) const;
     string              itsName;
     CoordinateSystem    itsCoordinateSystem;
     AntennaList         itsAntennae;
     ITRFDirection::Ptr  itsNCP;
     mutable real_t      itsNCPCacheTime;
     mutable vector3r_t  itsNCPCacheDirection;
+    ITRFDirection::Ptr  itsNCPPol0;
+    mutable real_t      itsNCPPol0CacheTime;
+    mutable vector3r_t  itsNCPPol0CacheDirection;
 };
 
 // @}

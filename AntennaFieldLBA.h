@@ -50,7 +50,7 @@ public:
         const vector3r_t &direction, const vector3r_t &direction0) const;
 
     virtual matrix22c_t elementResponse(real_t time, real_t freq,
-        const vector3r_t &direction) const;
+        const vector3r_t &direction, const bool rotate) const;
 
 private:
     AntennaModelLBA::ConstPtr   itsAntennaModel;
