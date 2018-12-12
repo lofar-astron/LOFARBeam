@@ -82,7 +82,7 @@ Station::FieldList::const_iterator Station::endFields() const
 
 matrix22c_t Station::response(real_t time, real_t freq,
     const vector3r_t &direction, real_t freq0, const vector3r_t &station0,
-    const vector3r_t &tile0) const
+    const vector3r_t &tile0, const bool rotate) const
 {
     raw_response_t result = {{{{{}}, {{}}}}, {{}}};
     for(FieldList::const_iterator field_it = beginFields(),
@@ -92,7 +92,7 @@ matrix22c_t Station::response(real_t time, real_t freq,
             direction, freq0, phaseReference(), station0);
 
         raw_response_t antenna = (*field_it)->rawResponse(time, freq,
-            direction, tile0);
+            direction, tile0, rotate);
 
         result.response[0][0] += field.factor[0] * antenna.response[0][0];
         result.response[0][1] += field.factor[0] * antenna.response[0][1];

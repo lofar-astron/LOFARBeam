@@ -45,8 +45,10 @@ public:
     typedef std::shared_ptr<DualDipoleAntenna>       Ptr;
     typedef std::shared_ptr<const DualDipoleAntenna> ConstPtr;
 
+    virtual ~DualDipoleAntenna() final override { };
+
     virtual matrix22c_t response(real_t freq, const vector3r_t &direction)
-        const;
+        const final override;
 };
 
 // @}

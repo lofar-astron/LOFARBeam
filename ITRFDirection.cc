@@ -30,6 +30,11 @@ namespace LOFAR
 {
 namespace StationResponse
 {
+    //ITRF position of CS002LBA, just to use a fixed reference
+    const vector3r_t ITRFDirection::itsLOFARPosition = {{ 826577.022720000,461022.995082000,5064892.814 }};
+
+  //TODO: initialize converter with a time (and fixed position) and convert specific directions. Needed for wslean as well as for the makestationresponse executable.
+
 
 ITRFDirection::ITRFDirection(const vector3r_t &position,
     const vector2r_t &direction)
@@ -46,6 +51,12 @@ ITRFDirection::ITRFDirection(const vector3r_t &position,
         casacore::MDirection::Ref(casacore::MDirection::ITRF, itsFrame));
 }
 
+ITRFDirection::ITRFDirection(const vector2r_t &direction):
+  ITRFDirection(itsLOFARPosition, direction)
+{
+    //create ITRF Direction from fixed stationposition
+}
+
 ITRFDirection::ITRFDirection(const vector3r_t &position,
     const vector3r_t &direction)
 {
@@ -59,6 +70,14 @@ ITRFDirection::ITRFDirection(const vector3r_t &position,
         casacore::MDirection::Ref(casacore::MDirection::ITRF, itsFrame));
 }
 
+ITRFDirection::ITRFDirection(const vector3r_t &direction):
+  ITRFDirection(itsLOFARPosition, direction)
+
+{
+    //create ITRF Direction from fixed stationposition
+}
+
+
 vector3r_t ITRFDirection::at(real_t time) const
 {
     // Cannot use MeasFrame::resetEpoch(Double), because that assumes the
@@ -71,6 +90,7 @@ vector3r_t ITRFDirection::at(real_t time) const
     vector3r_t itrf = {{mvITRF(0), mvITRF(1), mvITRF(2)}};
     return itrf;
 }
+
 
 } //# namespace StationResponse
 } //# namespace LOFAR

@@ -36,10 +36,14 @@ AntennaFieldHBA::AntennaFieldHBA(const string &name,
 }
 
 matrix22c_t AntennaFieldHBA::response(real_t time, real_t freq,
-    const vector3r_t &direction, const vector3r_t &direction0) const
+    const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const
 {
-    return itsAntennaModel->response(freq, itrf2field(direction),
-        itrf2field(direction0)) * rotation(time, direction);
+    if (rotate)
+        return itsAntennaModel->response(freq, itrf2field(direction),
+            itrf2field(direction0)) * rotation(time, direction);
+    else
+        return itsAntennaModel->response(freq, itrf2field(direction),
+            itrf2field(direction0));
 }
 
 diag22c_t AntennaFieldHBA::arrayFactor(real_t, real_t freq,
@@ -50,11 +54,12 @@ diag22c_t AntennaFieldHBA::arrayFactor(real_t, real_t freq,
 }
 
 raw_response_t AntennaFieldHBA::rawResponse(real_t time, real_t freq,
-    const vector3r_t &direction, const vector3r_t &direction0) const
+    const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const
 {
     raw_response_t result = itsAntennaModel->rawResponse(freq,
         itrf2field(direction), itrf2field(direction0));
-    result.response = result.response * rotation(time, direction);
+    if (rotate)
+        result.response = result.response * rotation(time, direction);
     return result;
 }
 
@@ -66,10 +71,13 @@ raw_array_factor_t AntennaFieldHBA::rawArrayFactor(real_t, real_t freq,
 }
 
 matrix22c_t AntennaFieldHBA::elementResponse(real_t time, real_t freq,
-    const vector3r_t &direction) const
+    const vector3r_t &direction, const bool rotate) const
 {
-    return itsAntennaModel->elementResponse(freq, itrf2field(direction))
+  if (rotate)
+      return itsAntennaModel->elementResponse(freq, itrf2field(direction))
         * rotation(time, direction);
+  else
+      return itsAntennaModel->elementResponse(freq, itrf2field(direction));
 }
 
 } //# namespace StationResponse

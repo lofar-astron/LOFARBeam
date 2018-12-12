@@ -136,6 +136,7 @@ public:
      *  \param freq0 %Station beam former reference frequency (Hz).
      *  \param station0 %Station beam former reference direction (ITRF, m).
      *  \param tile0 Tile beam former reference direction (ITRF, m).
+     *  \param rotate Boolean deciding if paralactic rotation should be applied.
      *  \return Jones matrix that represents the %station response.
      *
      *  For any given sub-band, the %LOFAR station beam former computes weights
@@ -152,7 +153,7 @@ public:
      *  wave arrives.
      */
     matrix22c_t response(real_t time, real_t freq, const vector3r_t &direction,
-        real_t freq0, const vector3r_t &station0, const vector3r_t &tile0)
+        real_t freq0, const vector3r_t &station0, const vector3r_t &tile0, const bool rotate = true)
         const;
 
     /*!
@@ -168,6 +169,7 @@ public:
      *  \param freq0 %Station beam former reference frequency (Hz).
      *  \param station0 %Station beam former reference direction (ITRF, m).
      *  \param tile0 Tile beam former reference direction (ITRF, m).
+     *  \param rotate Boolean deciding if paralactic rotation should be applied.
      *  \return A diagonal matrix with the array factor of the X and Y antennae.
      *
      *  For any given sub-band, the %LOFAR station beam former computes weights
@@ -207,6 +209,7 @@ public:
      *  \param freq0 %Station beam former reference frequency (Hz).
      *  \param station0 %Station beam former reference direction (ITRF, m).
      *  \param tile0 Tile beam former reference direction (ITRF, m).
+     *  \param rotate Boolean deciding if paralactic rotation should be applied.
      *  \param buffer Output iterator with room for \p count instances of type
      *  ::matrix22c_t.
      *
@@ -216,7 +219,7 @@ public:
     template <typename T, typename U>
     void response(unsigned int count, real_t time, T freq,
         const vector3r_t &direction, real_t freq0, const vector3r_t &station0,
-        const vector3r_t &tile0, U buffer) const;
+        const vector3r_t &tile0, U buffer, const bool rotate=true) const;
 
     /*!
      *  \brief Convenience method to compute the array factor of the station for
@@ -230,6 +233,7 @@ public:
      *  \param freq0 %Station beam former reference frequency (Hz).
      *  \param station0 %Station beam former reference direction (ITRF, m).
      *  \param tile0 Tile beam former reference direction (ITRF, m).
+     *  \param rotate Boolean deciding if paralactic rotation should be applied.
      *  \param buffer Output iterator with room for \p count instances of type
      *  ::diag22c_t.
      *
@@ -254,6 +258,7 @@ public:
      *  frequencies (Hz) of length \p count.
      *  \param station0 %Station beam former reference direction (ITRF, m).
      *  \param tile0 Tile beam former reference direction (ITRF, m).
+     *  \param rotate Boolean deciding if paralactic rotation should be applied.
      *  \param buffer Output iterator with room for \p count instances of type
      *  ::matrix22c_t.
      *
@@ -263,7 +268,7 @@ public:
     template <typename T, typename U>
     void response(unsigned int count, real_t time, T freq,
         const vector3r_t &direction, T freq0, const vector3r_t &station0,
-        const vector3r_t &tile0, U buffer) const;
+        const vector3r_t &tile0, U buffer, const bool rotate=true) const;
 
     /*!
      *  \brief Convenience method to compute the array factor of the station for
@@ -277,6 +282,7 @@ public:
      *  \param freq0 %Station beam former reference frequency (Hz).
      *  \param station0 %Station beam former reference direction (ITRF, m).
      *  \param tile0 Tile beam former reference direction (ITRF, m).
+     *  \param rotate Boolean deciding if paralactic rotation should be applied.
      *  \param buffer Output iterator with room for \p count instances of type
      *  ::diag22c_t.
      *
@@ -311,11 +317,12 @@ private:
 template <typename T, typename U>
 void Station::response(unsigned int count, real_t time, T freq,
     const vector3r_t &direction, real_t freq0, const vector3r_t &station0,
-    const vector3r_t &tile0, U buffer) const
+    const vector3r_t &tile0, U buffer, const bool rotate) const
 {
     for(unsigned int i = 0; i < count; ++i)
     {
-        *buffer++ = response(time, *freq++, direction, freq0, station0, tile0);
+        *buffer++ = response(time, *freq++, direction, freq0, station0, tile0,
+            rotate);
     }
 }
 
@@ -334,12 +341,12 @@ void Station::arrayFactor(unsigned int count, real_t time, T freq,
 template <typename T, typename U>
 void Station::response(unsigned int count, real_t time, T freq,
     const vector3r_t &direction, T freq0, const vector3r_t &station0,
-    const vector3r_t &tile0, U buffer) const
+    const vector3r_t &tile0, U buffer, const bool rotate) const
 {
     for(unsigned int i = 0; i < count; ++i)
     {
         *buffer++ = response(time, *freq++, direction, *freq0++, station0,
-            tile0);
+            tile0, rotate);
     }
 }
 

@@ -40,7 +40,9 @@ AntennaField::AntennaField(const string &name,
         itsNCPCacheTime(-1)
 {
     vector3r_t ncp = {{0.0, 0.0, 1.0}};
-    itsNCP.reset(new ITRFDirection(position(), ncp));
+    itsNCP.reset(new ITRFDirection(ncp));
+    vector3r_t ncppol0 = {{0.0, 0.6, 0.8}};
+    itsNCPPol0.reset(new ITRFDirection(ncppol0));
 }
 
 AntennaField::~AntennaField()
@@ -102,6 +104,16 @@ vector3r_t AntennaField::ncp(real_t time) const
 
     return itsNCPCacheDirection;
 }
+vector3r_t AntennaField::ncppol0(real_t time) const
+{
+    if(time != itsNCPPol0CacheTime)
+    {
+        itsNCPPol0CacheDirection = itsNCPPol0->at(time);
+        itsNCPPol0CacheTime = time;
+    }
+
+    return itsNCPPol0CacheDirection;
+}
 
 vector3r_t AntennaField::itrf2field(const vector3r_t &itrf) const
 {
@@ -114,6 +126,7 @@ vector3r_t AntennaField::itrf2field(const vector3r_t &itrf) const
 matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     const
 {
+    //rotation needs to be optional, normally you only want to rotate your coordinatesytem for the center of your (mosaiced) image    
     // Compute the cross product of the NCP and the target direction. This
     // yields a vector tangent to the celestial sphere at the target
     // direction, pointing towards the East (the direction of +Y in the IAU
@@ -124,12 +137,8 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     if (abs(ncp(time)[0]-direction[0])<1e-9 &&
         abs(ncp(time)[1]-direction[1])<1e-9 &&
         abs(ncp(time)[2]-direction[2])<1e-9) {
-        // Make sure v1 is orthogonal to ncp(time). The first two components
-        // of v1 are arbitrary.
-        v1[0]=1.;
-        v1[1]=0.;
-        v1[2]=-(ncp(time)[0]*v1[0]+ncp(time)[1]*v1[1])/ncp(time)[2];
-        v1=normalize(v1);
+        // Make sure v1 is orthogonal to ncp(time). In the direction of the meridian
+        v1 = normalize(cross(ncp(time), ncppol0(time)));
     } else {
         v1 = normalize(cross(ncp(time), direction));
     }
@@ -144,15 +153,10 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     vector3r_t v2;
     if (abs(itsCoordinateSystem.axes.r[0]-direction[0])<1e-9 &&
         abs(itsCoordinateSystem.axes.r[1]-direction[1])<1e-9 &&
-        abs(itsCoordinateSystem.axes.r[2]-direction[2])<1e-9) {
-        // Make sure v2 is orthogonal to r. The first two components
-        // of v2 are arbitrary.
-        v2[0]=1.;
-        v2[1]=0.;
-        v2[2]=-(itsCoordinateSystem.axes.r[0]*v2[0]+
-                itsCoordinateSystem.axes.r[1]*v2[1])/
-                itsCoordinateSystem.axes.r[2];
-        v2=normalize(v2);
+        abs(itsCoordinateSystem.axes.r[2]-direction[2])<1e-9)
+    {
+        // Nothing to be rotated if the direction is equal to zenith
+        v2 = v1;
     } else {
         v2 = normalize(cross(itsCoordinateSystem.axes.r, direction));
     }
@@ -161,7 +165,11 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     // between v1 and v2, both tangent to a latitude circle of their
     // respective spherical coordinate systems.
     real_t coschi = dot(v1, v2);
-    real_t sinchi = dot(cross(v1, v2), direction);
+    real_t sinchi;
+    if (coschi==1.0)
+      sinchi = 0.0;
+    else
+      sinchi = dot(cross(v1, v2), direction);
 
     // The input coordinate system is a right handed system with its third
     // axis along the direction of propagation (IAU +Z). The output
@@ -203,9 +211,9 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
 }
 
 matrix22c_t AntennaField::response(real_t time, real_t freq,
-    const vector3r_t &direction, const vector3r_t &direction0) const
+    const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const
 {
-    return normalize(rawResponse(time, freq, direction, direction0));
+    return normalize(rawResponse(time, freq, direction, direction0, rotate));
 }
 
 diag22c_t AntennaField::arrayFactor(real_t time, real_t freq,
@@ -215,12 +223,12 @@ diag22c_t AntennaField::arrayFactor(real_t time, real_t freq,
 }
 
 raw_response_t AntennaField::rawResponse(real_t time, real_t freq,
-    const vector3r_t &direction, const vector3r_t &direction0) const
+    const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const
 {
     raw_array_factor_t af = rawArrayFactor(time, freq, direction, direction0);
 
     raw_response_t result;
-    result.response = elementResponse(time, freq, direction);
+    result.response = elementResponse(time, freq, direction, rotate);
     result.response[0][0] *= af.factor[0];
     result.response[0][1] *= af.factor[0];
     result.response[1][0] *= af.factor[1];
