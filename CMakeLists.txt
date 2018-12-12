@@ -18,8 +18,8 @@ add_library(stationresponse SHARED
   AntennaModelLBA.cc
   DualDipoleAntenna.cc
   ElementResponse.cc
+  ITRFConverter.cc
   ITRFDirection.cc
-  Dir2ITRF.cc
   LofarMetaDataUtil.cc
   MathUtil.cc
   Station.cc
@@ -41,8 +41,8 @@ install (FILES
   LofarMetaDataUtil.h
   Station.h
   Types.h
+  ITRFConverter.h
   ITRFDirection.h
-  Dir2ITRF.h
 DESTINATION include/StationResponse)
 
 install (FILES

@@ -47,10 +47,10 @@ public:
         const AntennaModelLBA::ConstPtr &model);
 
     virtual raw_array_factor_t rawArrayFactor(real_t time, real_t freq,
-        const vector3r_t &direction, const vector3r_t &direction0) const;
+        const vector3r_t &direction, const vector3r_t &direction0) const final override;
 
     virtual matrix22c_t elementResponse(real_t time, real_t freq,
-        const vector3r_t &direction, const bool rotate) const;
+        const vector3r_t &direction, const bool rotate) const final override;
 
 private:
     AntennaModelLBA::ConstPtr   itsAntennaModel;

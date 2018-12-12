@@ -41,7 +41,6 @@ namespace StationResponse
 
 // \addtogroup StationResponse
 // @{
-const vector3r_t lofarposition  = {{826577.022720000,461022.995082000,5064892.814}}; //ITRF position of CS002LBA, just to use a fixed reference
 
 class ITRFDirection
 {
@@ -56,9 +55,12 @@ public:
 
     vector3r_t at(real_t time) const;
 
-    
+    const static vector3r_t& LOFARPosition() { return itsLOFARPosition; }
 
 private:
+    //ITRF position of CS002LBA, just to use a fixed reference
+    const static vector3r_t itsLOFARPosition;
+
     mutable casacore::MeasFrame             itsFrame;
     mutable casacore::MDirection::Convert   itsConverter;
 };

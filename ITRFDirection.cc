@@ -30,6 +30,9 @@ namespace LOFAR
 {
 namespace StationResponse
 {
+    //ITRF position of CS002LBA, just to use a fixed reference
+    const vector3r_t ITRFDirection::itsLOFARPosition = {{ 826577.022720000,461022.995082000,5064892.814 }};
+
   //TODO: initialize converter with a time (and fixed position) and convert specific directions. Needed for wslean as well as for the makestationresponse executable.
 
 
@@ -49,7 +52,7 @@ ITRFDirection::ITRFDirection(const vector3r_t &position,
 }
 
 ITRFDirection::ITRFDirection(const vector2r_t &direction):
-  ITRFDirection(lofarposition, direction)
+  ITRFDirection(itsLOFARPosition, direction)
 {
     //create ITRF Direction from fixed stationposition
 }
@@ -68,7 +71,7 @@ ITRFDirection::ITRFDirection(const vector3r_t &position,
 }
 
 ITRFDirection::ITRFDirection(const vector3r_t &direction):
-  ITRFDirection(lofarposition,direction)
+  ITRFDirection(itsLOFARPosition, direction)
 
 {
     //create ITRF Direction from fixed stationposition

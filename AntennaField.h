@@ -162,6 +162,8 @@ public:
      *  \param freq Frequency of the plane wave (Hz).
      *  \param direction Direction of arrival (ITRF, m).
      *  \param direction0 Tile beam former reference direction (ITRF, m).
+     *  \param rotate true if the parallactic angle is to be rotated towards
+     *         the NCP. 
      *  \return Jones matrix that represents the response of the antenna field.
      *
      *  The directions \p direction, and \p direction0 are vectors that
@@ -227,7 +229,6 @@ public:
     /*!
      *  \brief Compute the response of a single antenna for a plane wave of
      *  frequency \p freq, arriving from direction \p direction.
-     *
      */
     virtual matrix22c_t elementResponse(real_t time, real_t freq,
         const vector3r_t &direction, const bool rotate) const = 0;
@@ -242,6 +243,7 @@ protected:
 private:
     vector3r_t ncp(real_t time) const;
     vector3r_t ncppol0(real_t time) const;
+
     string              itsName;
     CoordinateSystem    itsCoordinateSystem;
     AntennaList         itsAntennae;

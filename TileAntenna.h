@@ -48,15 +48,17 @@ public:
 
     explicit TileAntenna(const TileConfig &config);
 
+    virtual ~TileAntenna() final override { }
+
     void setConfig(const TileConfig &config);
 
     const TileConfig &config() const;
 
     virtual raw_array_factor_t rawArrayFactor(real_t freq,
-        const vector3r_t &direction, const vector3r_t &direction0) const;
+        const vector3r_t &direction, const vector3r_t &direction0) const final override;
 
     virtual matrix22c_t elementResponse(real_t freq,
-        const vector3r_t &direction) const;
+        const vector3r_t &direction) const final override;
 
 private:
     TileConfig  itsConfig;

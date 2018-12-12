@@ -153,7 +153,7 @@ public:
      *  wave arrives.
      */
     matrix22c_t response(real_t time, real_t freq, const vector3r_t &direction,
-			 real_t freq0, const vector3r_t &station0, const vector3r_t &tile0, const bool rotate = true)
+        real_t freq0, const vector3r_t &station0, const vector3r_t &tile0, const bool rotate = true)
         const;
 
     /*!
@@ -186,7 +186,7 @@ public:
      *  wave arrives.
      */
     diag22c_t arrayFactor(real_t time, real_t freq, const vector3r_t &direction,
-			  real_t freq0, const vector3r_t &station0, const vector3r_t &tile0)
+        real_t freq0, const vector3r_t &station0, const vector3r_t &tile0)
         const;
 
     /*!
@@ -219,7 +219,7 @@ public:
     template <typename T, typename U>
     void response(unsigned int count, real_t time, T freq,
         const vector3r_t &direction, real_t freq0, const vector3r_t &station0,
-	const vector3r_t &tile0, U buffer, const bool rotate=true) const;
+        const vector3r_t &tile0, U buffer, const bool rotate=true) const;
 
     /*!
      *  \brief Convenience method to compute the array factor of the station for
@@ -358,7 +358,7 @@ void Station::arrayFactor(unsigned int count, real_t time, T freq,
     for(unsigned int i = 0; i < count; ++i)
     {
         *buffer++ = arrayFactor(time, *freq++, direction, *freq0++, station0,
-	    tile0);
+            tile0);
     }
 }
 

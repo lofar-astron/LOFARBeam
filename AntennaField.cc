@@ -125,8 +125,8 @@ vector3r_t AntennaField::itrf2field(const vector3r_t &itrf) const
 
 matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     const
-{   //rotation needs to be optional, normally you only want to rotate your coordinatesytem for the center of your (mosaiced) image
-    
+{
+    //rotation needs to be optional, normally you only want to rotate your coordinatesytem for the center of your (mosaiced) image    
     // Compute the cross product of the NCP and the target direction. This
     // yields a vector tangent to the celestial sphere at the target
     // direction, pointing towards the East (the direction of +Y in the IAU
@@ -138,8 +138,8 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
         abs(ncp(time)[1]-direction[1])<1e-9 &&
         abs(ncp(time)[2]-direction[2])<1e-9) {
         // Make sure v1 is orthogonal to ncp(time). In the direction of the meridian
-        v1 = normalize(cross(ncp(time),ncppol0(time)));
-     } else {
+        v1 = normalize(cross(ncp(time), ncppol0(time)));
+    } else {
         v1 = normalize(cross(ncp(time), direction));
     }
 
@@ -153,10 +153,10 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     vector3r_t v2;
     if (abs(itsCoordinateSystem.axes.r[0]-direction[0])<1e-9 &&
         abs(itsCoordinateSystem.axes.r[1]-direction[1])<1e-9 &&
-        abs(itsCoordinateSystem.axes.r[2]-direction[2])<1e-9) {
-      //Nothing to be rotated if the direction is equal to zenith
+        abs(itsCoordinateSystem.axes.r[2]-direction[2])<1e-9)
+    {
+        // Nothing to be rotated if the direction is equal to zenith
         v2 = v1;
-
     } else {
         v2 = normalize(cross(itsCoordinateSystem.axes.r, direction));
     }
@@ -166,8 +166,8 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     // respective spherical coordinate systems.
     real_t coschi = dot(v1, v2);
     real_t sinchi;
-    if (coschi==1)
-      sinchi = 0;
+    if (coschi==1.0)
+      sinchi = 0.0;
     else
       sinchi = dot(cross(v1, v2), direction);
 
@@ -213,7 +213,7 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
 matrix22c_t AntennaField::response(real_t time, real_t freq,
     const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const
 {
-  return normalize(rawResponse(time, freq, direction, direction0, rotate));
+    return normalize(rawResponse(time, freq, direction, direction0, rotate));
 }
 
 diag22c_t AntennaField::arrayFactor(real_t time, real_t freq,
@@ -225,7 +225,7 @@ diag22c_t AntennaField::arrayFactor(real_t time, real_t freq,
 raw_response_t AntennaField::rawResponse(real_t time, real_t freq,
     const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const
 {
-  raw_array_factor_t af = rawArrayFactor(time, freq, direction, direction0);
+    raw_array_factor_t af = rawArrayFactor(time, freq, direction, direction0);
 
     raw_response_t result;
     result.response = elementResponse(time, freq, direction, rotate);
