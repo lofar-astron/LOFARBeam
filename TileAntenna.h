@@ -28,6 +28,7 @@
 
 #include "AntennaModelHBA.h"
 
+#include <array>
 #include <memory>
 
 namespace LOFAR
@@ -44,7 +45,7 @@ public:
     typedef std::shared_ptr<TileAntenna>         Ptr;
     typedef std::shared_ptr<const TileAntenna>   ConstPtr;
 
-    typedef static_array<vector3r_t, 16>    TileConfig;
+    typedef std::array<vector3r_t, 16>    TileConfig;
 
     explicit TileAntenna(const TileConfig &config);
 
