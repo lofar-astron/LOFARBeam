@@ -26,7 +26,7 @@
 // \file
 // Types used in this library.
 
-//#include <Common/StreamUtil.h>
+#include <array>
 #include <cstring>
 #include <ostream>
 #include <complex>
@@ -39,82 +39,9 @@ namespace StationResponse
 // \addtogroup StationResponse
 // @{
 
-/**
- *  \brief Array of static size.
- *
- *  This struct wraps a (unidimensional) C array. Like C arrays, it is possible
- *  to use initializers, for example:
- *  \code
- *  int foo[3] = {1, 2, 3};
- *  static_array<int, 3> bar = {{1, 2, 3}};
- *  \endcode
- *  Note the \e double curly braces.
- *
- *  Unlike C arrays, it is possible to return instances of this struct.
- *  \code
- *  static_array<int, 3> foo()
- *  {
- *      static_array<int, 3> bar = {{1, 2, 3}};
- *      return bar;
- *  }
- *  \endcode
- *  \see boost::array
- */
-template <typename T, size_t N>
-struct static_array
-{
-    typedef T       *iterator;
-    typedef const T *const_iterator;
-
-    T  __data[N];
-
-    /** Returns the size of the array. */
-    static size_t size();
-
-    /**
-     *  \brief Read-only access to a specific array element.
-     *  \param n Index (0-based) of the element to access.
-     *  \return A constant reference to the element at index \p n.
-     *
-     *  This operator provides array-style element access. No range check is
-     *  performed on the index \p n. The result of this operator is undefined
-     *  for out of range indices.
-     */
-    const T &operator[](size_t n) const;
-
-    /**
-     *  \brief Access to a specific array element.
-     *  \param n Index (0-based) of the element to access.
-     *  \return A non-constant reference to the element at index \p n.
-     *
-     *  This operator provides array-style element access. No range check is
-     *  performed on the index \p n. The result of this operator is undefined
-     *  for out of range indices.
-     */
-    T &operator[](size_t n);
-
-    /** Returns an iterator that points to the first element in the array. */
-    iterator begin();
-
-    /** Returns an iterator that points one past the last  element in the
-     *  array.
-     */
-    iterator end();
-
-    /** Returns a read-only iterator that points to the first element in the
-     *  array.
-     */
-    const_iterator begin() const;
-
-    /** Returns a read-only iterator that points one past the last element in
-     *  the array.
-     */
-    const_iterator end() const;
-};
-
 /** Print the contents of a static array. */
 template <typename T, size_t N>
-std::ostream &operator<<(std::ostream &out, const static_array<T,N> &obj);
+std::ostream &operator<<(std::ostream &out, const std::array<T, N> &obj);
 
 /** Type used for real scalars. */
 typedef double                                      real_t;
@@ -123,22 +50,22 @@ typedef double                                      real_t;
 typedef std::complex<double>                        complex_t;
 
 /** Type used for 2-dimensional real vectors. */
-typedef static_array<real_t, 2>                     vector2r_t;
+typedef std::array<real_t, 2>                     vector2r_t;
 
 /** Type used for 3-dimensional real vectors. */
-typedef static_array<real_t, 3>                     vector3r_t;
+typedef std::array<real_t, 3>                     vector3r_t;
 
 /** Type used for 2x2 real diagonal matrices. */
-typedef static_array<real_t, 2>                     diag22r_t;
+typedef std::array<real_t, 2>                     diag22r_t;
 
 /** Type used for 2x2 complex diagonal matrices. */
-typedef static_array<complex_t, 2>                  diag22c_t;
+typedef std::array<complex_t, 2>                  diag22c_t;
 
 /** Type used for 2x2 real matrices. */
-typedef static_array<static_array<real_t, 2>, 2>    matrix22r_t;
+typedef std::array<std::array<real_t, 2>, 2>    matrix22r_t;
 
 /** Type used for 2x2 complex matrices. */
-typedef static_array<static_array<complex_t, 2>, 2> matrix22c_t;
+typedef std::array<std::array<complex_t, 2>, 2> matrix22c_t;
 
 /** Response of an array of antenna elements. */
 struct raw_response_t
@@ -175,56 +102,8 @@ struct raw_array_factor_t
 
 // @}
 
-//# ------------------------------------------------------------------------- //
-//# - Implementation: static_array                                          - //
-//# ------------------------------------------------------------------------- //
-
 template <typename T, size_t N>
-inline const T &static_array<T, N>::operator[](size_t n) const
-{
-    return __data[n];
-}
-
-template <typename T, size_t N>
-inline T &static_array<T, N>::operator[](size_t n)
-{
-    return __data[n];
-}
-
-template <typename T, size_t N>
-inline typename static_array<T, N>::iterator static_array<T, N>::begin()
-{
-    return __data;
-}
-
-template <typename T, size_t N>
-inline typename static_array<T, N>::iterator static_array<T, N>::end()
-{
-    return __data + N;
-}
-
-template <typename T, size_t N>
-inline typename static_array<T, N>::const_iterator static_array<T, N>::begin()
-    const
-{
-    return __data;
-}
-
-template <typename T, size_t N>
-inline typename static_array<T, N>::const_iterator static_array<T, N>::end()
-    const
-{
-    return __data + N;
-}
-
-template <typename T, size_t N>
-inline size_t static_array<T, N>::size()
-{
-    return N;
-}
-
-template <typename T, size_t N>
-std::ostream &operator<<(std::ostream &out, const static_array<T,N> &obj)
+std::ostream &operator<<(std::ostream &out, const std::array<T, N> &obj)
 {
   print(out, obj.begin(), obj.end());
   return out;
