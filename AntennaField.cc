@@ -104,6 +104,7 @@ vector3r_t AntennaField::ncp(real_t time) const
 
     return itsNCPCacheDirection;
 }
+
 vector3r_t AntennaField::ncppol0(real_t time) const
 {
     if(time != itsNCPPol0CacheTime)
@@ -134,9 +135,9 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     // Test if the direction is equal to the NCP. If it is, take a random
     // vector orthogonal to v1 (the east is not defined here).
     vector3r_t v1;
-    if (abs(ncp(time)[0]-direction[0])<1e-9 &&
-        abs(ncp(time)[1]-direction[1])<1e-9 &&
-        abs(ncp(time)[2]-direction[2])<1e-9) {
+    if (std::abs(ncp(time)[0]-direction[0])<1e-9 &&
+        std::abs(ncp(time)[1]-direction[1])<1e-9 &&
+        std::abs(ncp(time)[2]-direction[2])<1e-9) {
         // Make sure v1 is orthogonal to ncp(time). In the direction of the meridian
         v1 = normalize(cross(ncp(time), ncppol0(time)));
     } else {
@@ -151,9 +152,9 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
     // Test if the normal is equal to the target direction. If it is, take
     // a random vector orthogonal to the normal.
     vector3r_t v2;
-    if (abs(itsCoordinateSystem.axes.r[0]-direction[0])<1e-9 &&
-        abs(itsCoordinateSystem.axes.r[1]-direction[1])<1e-9 &&
-        abs(itsCoordinateSystem.axes.r[2]-direction[2])<1e-9)
+    if (std::abs(itsCoordinateSystem.axes.r[0]-direction[0])<1e-9 &&
+        std::abs(itsCoordinateSystem.axes.r[1]-direction[1])<1e-9 &&
+        std::abs(itsCoordinateSystem.axes.r[2]-direction[2])<1e-9)
     {
         // Nothing to be rotated if the direction is equal to zenith
         v2 = v1;
