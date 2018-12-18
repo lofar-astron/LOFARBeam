@@ -208,7 +208,7 @@ public:
      *  const vector3r_t &direction0) const
      */
     virtual raw_response_t rawResponse(real_t time, real_t freq,
-        const vector3r_t &direction, const vector3r_t &direction0, const bool rotate) const;
+        const vector3r_t &direction, const vector3r_t &direction0, const bool rotate = true) const;
 
     /*!
      *  \brief Compute the array factor of the antenna field for a plane wave of
@@ -233,7 +233,7 @@ public:
      *         the NCP. 
      */
     virtual matrix22c_t elementResponse(real_t time, real_t freq,
-        const vector3r_t &direction, const bool rotate) const = 0;
+        const vector3r_t &direction, const bool rotate = true) const = 0;
 
 protected:
     /** Compute the parallactic rotation. */
