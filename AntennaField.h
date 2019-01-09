@@ -257,8 +257,9 @@ private:
      *
      * NCP pol0 is the direction used as reference in the coordinate system
      * when the target direction is close to/at the NCP. The regular coordinate
-     * system rotates the parallactic angle towards the NCP, which is undefined
-     * at the NCP. It is currently defined as ITRF position (0.0, 0.6, 0.8).
+     * system rotates local east to that defined with respect to the NCP, 
+     * which is undefined at the NCP. 
+     * It is currently defined as ITRF position (1.0, 0.0, 0.0).
      *
      * Added by Maaijke Mevius, December 2018.
      */

@@ -41,7 +41,7 @@ AntennaField::AntennaField(const string &name,
 {
     vector3r_t ncp = {{0.0, 0.0, 1.0}};
     itsNCP.reset(new ITRFDirection(ncp));
-    vector3r_t ncppol0 = {{0.0, 0.6, 0.8}};
+    vector3r_t ncppol0 = {{1.0, 0.0, 0.0}};
     itsNCPPol0.reset(new ITRFDirection(ncppol0));
 }
 
@@ -139,7 +139,7 @@ matrix22r_t AntennaField::rotation(real_t time, const vector3r_t &direction)
         std::abs(ncp(time)[1]-direction[1])<1e-9 &&
         std::abs(ncp(time)[2]-direction[2])<1e-9) {
         // Make sure v1 is orthogonal to ncp(time). In the direction of the meridian
-        v1 = normalize(cross(ncp(time), ncppol0(time)));
+        v1 = normalize(ncppol0(time));
     } else {
         v1 = normalize(cross(ncp(time), direction));
     }
