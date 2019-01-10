@@ -29,6 +29,8 @@ add_library(stationresponse SHARED
 add_library(elementresponse SHARED
   ElementResponse.cc)
 
+target_link_libraries(stationresponse casa_casa casa_measures casa_tables casa_ms)
+
 set_target_properties(stationresponse PROPERTIES VERSION 2)
 set_target_properties(elementresponse PROPERTIES VERSION 2)
 
