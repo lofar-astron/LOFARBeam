@@ -32,8 +32,9 @@ add_library(elementresponse SHARED
 set_target_properties(stationresponse PROPERTIES VERSION 2)
 set_target_properties(elementresponse PROPERTIES VERSION 2)
 
+# The elementresponse lib does not require casacore, so
+# linking casacore only to stationresponse is enough.
 target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
-target_link_libraries(elementresponse ${CASACORE_LIBRARIES})
 
 install (TARGETS stationresponse DESTINATION lib)
 install (TARGETS elementresponse DESTINATION lib)
