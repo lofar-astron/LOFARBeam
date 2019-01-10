@@ -29,6 +29,9 @@ add_library(stationresponse SHARED
 add_library(elementresponse SHARED
   ElementResponse.cc)
 
+set_target_properties(stationresponse PROPERTIES VERSION 2)
+set_target_properties(elementresponse PROPERTIES VERSION 2)
+
 target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
 target_link_libraries(elementresponse ${CASACORE_LIBRARIES})
 
