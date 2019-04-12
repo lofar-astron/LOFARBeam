@@ -64,3 +64,15 @@ add_custom_target(doc
 elseif(DOXYGEN_FOUND)
 
 endif(DOXYGEN_FOUND)
+
+find_package (Python COMPONENTS Development)
+find_package(Boost COMPONENTS python)
+find_package(Casacore REQUIRED COMPONENTS python)
+
+if(Boost_PYTHON_FOUND)
+    add_library(_stationresponse MODULE pystationresponse.cc)
+    set_target_properties(_stationresponse PROPERTIES PREFIX "")
+    target_include_directories(_stationresponse PRIVATE ${PYTHON_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+    target_link_libraries(_stationresponse stationresponse ${CASA_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY})
+endif(Boost_PYTHON_FOUND)
+
