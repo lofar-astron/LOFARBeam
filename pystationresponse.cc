@@ -44,7 +44,7 @@
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
-using namespace casa;
+using namespace casacore;
 using namespace boost::python;
 using namespace LOFAR::StationResponse;
 
@@ -56,18 +56,18 @@ namespace BBS
   {
     /*!
      *  \brief Convert an ITRF position given as a StationResponse::vector3r_t
-     *  instance to a casa::MPosition.
+     *  instance to a casacore::MPosition.
      */
     MPosition toMPositionITRF(const vector3r_t &position);
 
     /*!
-     *  \brief Convert a casa::MPosition instance to a
+     *  \brief Convert a casacore::MPosition instance to a
      #  StationResponse::vector3r_t instance.
      */
     vector3r_t fromMPosition(const MPosition &position);
 
     /*!
-     *  \brief Convert a casa::MDirection instance to a
+     *  \brief Convert a casacore::MDirection instance to a
      *  StationResponse::vector3r_t instance.
      */
     vector3r_t fromMDirection(const MDirection &direction);
