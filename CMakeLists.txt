@@ -74,5 +74,8 @@ if(Boost_PYTHON_FOUND)
     set_target_properties(_stationresponse PROPERTIES PREFIX "")
     target_include_directories(_stationresponse PRIVATE ${PYTHON_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
     target_link_libraries(_stationresponse stationresponse ${CASA_PYTHON_LIBRARY} ${Boost_PYTHON_LIBRARY})
+    install(TARGETS _stationresponse DESTINATION ${PYTHON_INSTALL_DIR}/lofar/stationresponse)
+    install(FILES __init__.py DESTINATION ${PYTHON_INSTALL_DIR}/lofar/stationresponse)
+
 endif(Boost_PYTHON_FOUND)
 
