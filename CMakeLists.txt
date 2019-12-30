@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(lofarbeam)
 
+find_package(HDF5 COMPONENTS C CXX REQUIRED)
+include_directories(${HDF5_INCLUDE_DIR})
+add_executable(convert_coeff_hdf5.x convert_coeff_hdf5.cc HamakerCoeff.cc)
+target_link_libraries(convert_coeff_hdf5.x ${HDF5_LIBRARIES})
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 
 set(CASACORE_MAKE_REQUIRED_EXTERNALS_OPTIONAL TRUE)
