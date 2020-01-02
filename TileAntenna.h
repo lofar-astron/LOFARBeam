@@ -28,6 +28,9 @@
 
 #include "AntennaModelHBA.h"
 
+#include "HamakerCoeff.h"
+#include "config.h"
+
 #include <array>
 #include <memory>
 
@@ -63,6 +66,7 @@ public:
 
 private:
     TileConfig  itsConfig;
+    HamakerCoefficients* hba_coeff;
 };
 
 // @}

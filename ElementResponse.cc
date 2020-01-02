@@ -23,40 +23,34 @@
 
 #include "ElementResponse.h"
 
-#include <cmath>
+#include "config.h"
 
-// The coefficients are kept in an unnamed namespace which effectively makes
-// them invisible outside this translation unit.
-namespace
-{
+#include <cmath>
+#include <sstream>
+
 // PI / 2.0
 const double pi_2 = 1.570796326794896619231322;
-
-#include "DefaultCoeffLBA.cc"
-#include "DefaultCoeffHBA.cc"
-}
 
 namespace LOFAR
 {
 
 void element_response_lba(double freq, double theta, double phi,
-    std::complex<double> (&response)[2][2])
+    std::complex<double> (&response)[2][2],
+    HamakerCoefficients& lba_coeff)
 {
-    element_response(freq, theta, phi, response, default_lba_freq_center,
-        default_lba_freq_range, default_lba_coeff_shape, default_lba_coeff);
+    element_response(freq, theta, phi, response, lba_coeff);
 }
 
 void element_response_hba(double freq, double theta, double phi,
-    std::complex<double> (&response)[2][2])
+    std::complex<double> (&response)[2][2],
+    HamakerCoefficients& hba_coeff)
 {
-    element_response(freq, theta, phi, response, default_hba_freq_center,
-        default_hba_freq_range, default_hba_coeff_shape, default_hba_coeff);
+    element_response(freq, theta, phi, response, hba_coeff);
 }
 
 void element_response(double freq, double theta, double phi,
-    std::complex<double> (&response)[2][2], double freq_center,
-    double freq_range, const unsigned int (&coeff_shape)[3],
-    const std::complex<double> coeff[])
+    std::complex<double> (&response)[2][2],
+    HamakerCoefficients& coeffs)
 {
     // Initialize the response to zero.
     response[0][0] = 0.0;
@@ -70,14 +64,12 @@ void element_response(double freq, double theta, double phi,
         return;
     }
 
-    const unsigned int nHarmonics  = coeff_shape[0];
-    const unsigned int nPowerTheta = coeff_shape[1];
-    const unsigned int nPowerFreq  = coeff_shape[2];
-    const unsigned int nInner      = 2;
 
-    // Define an multi-dimensional array to index the coefficients
-    typedef std::complex<double> coeff_type[nHarmonics][nPowerTheta][nPowerFreq][nInner];
-    const coeff_type *coeff_arr = (coeff_type *) coeff;
+    const double freq_center       = coeffs.get_freq_center();
+    const double freq_range        = coeffs.get_freq_range();
+    const unsigned int nHarmonics  = coeffs.get_nHarmonics();
+    const unsigned int nPowerTheta = coeffs.get_nPowerTheta();
+    const unsigned int nPowerFreq  = coeffs.get_nPowerFreq();;
 
     // The model is parameterized in terms of a normalized frequency in the
     // range [-1, 1]. The appropriate conversion is taken care of below.
@@ -100,25 +92,29 @@ void element_response(double freq, double theta, double phi,
         // start indexing the block of coefficients at the last element
 
         // Evaluate the highest order term.
-        P[0] = (*coeff_arr)[k][nPowerTheta-1][nPowerFreq-1][0];
-        P[1] = (*coeff_arr)[k][nPowerTheta-1][nPowerFreq-1][1];
+        auto coeff = coeffs.get_coeff(k, nPowerTheta-1, nPowerFreq-1);
+        P[0] = coeff.first;
+        P[1] = coeff.second;
 
         for(unsigned int i = 0; i < nPowerFreq - 1; ++i)
         {
-            P[0] = P[0] * freq + (*coeff_arr)[k][nPowerTheta-1][nPowerFreq-i-2][0];
-            P[1] = P[1] * freq + (*coeff_arr)[k][nPowerTheta-1][nPowerFreq-i-2][1];
+            auto coeff = coeffs.get_coeff(k, nPowerTheta-1, nPowerFreq-i-2);
+            P[0] = P[0] * freq + coeff.first;
+            P[1] = P[1] * freq + coeff.second;
         }
 
         // Evaluate the remaining terms.
         for(unsigned int j = 0; j < nPowerTheta - 1; ++j)
         {
-            Pj[0] = (*coeff_arr)[k][nPowerTheta-j-2][nPowerFreq-1][0];
-            Pj[1] = (*coeff_arr)[k][nPowerTheta-j-2][nPowerFreq-1][1];
+            auto coeff = coeffs.get_coeff(k, nPowerTheta-j-2, nPowerFreq-1);
+            Pj[0] = coeff.first;
+            Pj[1] = coeff.second;
 
             for(unsigned int i = 0; i < nPowerFreq - 1; ++i)
             {
-                Pj[0] = Pj[0] * freq + (*coeff_arr)[k][nPowerTheta-j-2][nPowerFreq-i-2][0];
-                Pj[1] = Pj[1] * freq + (*coeff_arr)[k][nPowerTheta-j-2][nPowerFreq-i-2][1];
+                auto coeff = coeffs.get_coeff(k, nPowerTheta-j-2, nPowerFreq-i-2);
+                Pj[0] = Pj[0] * freq + coeff.first;
+                Pj[1] = Pj[1] * freq + coeff.second;
             }
 
             P[0] = P[0] * theta + Pj[0];
@@ -140,6 +136,7 @@ void element_response(double freq, double theta, double phi,
         sign = -sign;
         kappa += 2;
     }
+
 }
 
 } //# namespace LOFAR

@@ -1,3 +1,6 @@
+#ifndef HAMAKER_COEFF_H
+#define HAMAKER_COEFF_H
+
 #include <iostream>
 #include <string>
 #include <complex>
@@ -9,6 +12,8 @@
 
 class HamakerCoefficients {
     public:
+        HamakerCoefficients();
+
         // Constructor for reading coeff from file
         HamakerCoefficients(
             std::string& filename);
@@ -20,8 +25,6 @@ class HamakerCoefficients {
             const unsigned int nHarmonics,
             const unsigned int nPowerTheta,
             const unsigned int nPowerFreq);
-
-        size_t get_nr_coeffs() const;
 
         // Set
         void set_coeff(
@@ -37,6 +40,19 @@ class HamakerCoefficients {
             const std::vector<std::complex<double>> coeff);
 
         // Get
+        size_t get_nr_coeffs() const;
+
+        double get_freq_center() const { return m_freq_center; }
+
+        double get_freq_range() const { return m_freq_range; }
+
+        unsigned int get_nHarmonics() const { return m_nHarmonics; }
+
+        unsigned int get_nPowerTheta() const { return m_nPowerTheta; }
+
+        unsigned int get_nPowerFreq() const { return m_nPowerFreq; }
+
+
         std::pair<std::complex<double>, std::complex<double>> get_coeff(
             const unsigned int n,
             const unsigned int t,
@@ -74,3 +90,5 @@ class HamakerCoefficients {
         std::string m_dataset_name = "coeff";
         const unsigned int m_dataset_rank = 4;
 };
+
+#endif

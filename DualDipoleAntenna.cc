@@ -31,6 +31,15 @@ namespace LOFAR
 namespace StationResponse
 {
 
+DualDipoleAntenna::DualDipoleAntenna()
+{
+    std::stringstream ss;
+    ss << LOFARBEAM_DATA_DIR << "/";
+    ss << "HamakerLBACoeff.h5";
+    std::string s = ss.str();
+    lba_coeff = new HamakerCoefficients(s);
+}
+
 matrix22c_t DualDipoleAntenna::response(real_t freq,
     const vector3r_t &direction) const
 {
@@ -42,7 +51,8 @@ matrix22c_t DualDipoleAntenna::response(real_t freq,
     thetaphi[1] -= 5.0 * Constants::pi_4;
     matrix22c_t response;
     element_response_lba(freq, thetaphi[0], thetaphi[1],
-        reinterpret_cast<std::complex<double> (&)[2][2]>(response));
+        reinterpret_cast<std::complex<double> (&)[2][2]>(response),
+        *lba_coeff);
     return response;
 }
 

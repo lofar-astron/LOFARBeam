@@ -4,8 +4,14 @@ project(lofarbeam)
 
 find_package(HDF5 COMPONENTS C CXX REQUIRED)
 include_directories(${HDF5_INCLUDE_DIR})
-add_executable(convert_coeff_hdf5.x convert_coeff_hdf5.cc HamakerCoeff.cc)
-target_link_libraries(convert_coeff_hdf5.x ${HDF5_LIBRARIES})
+
+set(CMAKE_INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
+message("Storing data in: " ${CMAKE_INSTALL_DATA_DIR})
+install(FILES "${CMAKE_SOURCE_DIR}/HamakerHBACoeff.h5" DESTINATION ${CMAKE_INSTALL_DATA_DIR})
+install(FILES "${CMAKE_SOURCE_DIR}/HamakerLBACoeff.h5" DESTINATION ${CMAKE_INSTALL_DATA_DIR})
+
+configure_file(${CMAKE_SOURCE_DIR}/CMake/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+include_directories(${CMAKE_BINARY_DIR})
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 
@@ -29,7 +35,8 @@ add_library(stationresponse SHARED
   MathUtil.cc
   Station.cc
   TileAntenna.cc
-  Types.cc)
+  Types.cc
+  HamakerCoeff.cc)
 
 add_library(elementresponse SHARED
   ElementResponse.cc)
