@@ -73,6 +73,11 @@ void element_response(double freq, double theta, double phi,
     const unsigned int nHarmonics  = coeff_shape[0];
     const unsigned int nPowerTheta = coeff_shape[1];
     const unsigned int nPowerFreq  = coeff_shape[2];
+    const unsigned int nInner      = 2;
+
+    // Define an multi-dimensional array to index the coefficients
+    typedef std::complex<double> coeff_type[nHarmonics][nPowerTheta][nPowerFreq][nInner];
+    const coeff_type *coeff_arr = (coeff_type *) coeff;
 
     // The model is parameterized in terms of a normalized frequency in the
     // range [-1, 1]. The appropriate conversion is taken care of below.
@@ -92,50 +97,33 @@ void element_response(double freq, double theta, double phi,
         // element of P. The polynomials are evaluated using Horner's rule.
 
         // Horner's rule requires backward iteration of the coefficients, so
-        // move the iterator to the first location past the end of the block of
-        // coefficients for the current harmonic (k).
-        coeff += nPowerTheta * nPowerFreq * 2;
+        // start indexing the block of coefficients at the last element
 
-        // Evaluate the polynomial. Note that the iterator is always decremented
-        // before it is dereferenced, using the prefix operator--. After
-        // evaluation of the polynomial, the iterator points exactly to the
-        // beginning of the block of coefficients for the current harmonic (k),
-        // that is, all the decrements together exactly cancel the increment
-        // aplied above.
-
-        // Evaluate the highest order term. Note that the order of the
-        // assigments is important because of the iterator decrement, i.e. P[1]
-        // should be assigned first.
-        P[1] = *--coeff;
-        P[0] = *--coeff;
+        // Evaluate the highest order term.
+        P[0] = (*coeff_arr)[k][nPowerTheta-1][nPowerFreq-1][0];
+        P[1] = (*coeff_arr)[k][nPowerTheta-1][nPowerFreq-1][1];
 
         for(unsigned int i = 0; i < nPowerFreq - 1; ++i)
         {
-            P[1] = P[1] * freq + *--coeff;
-            P[0] = P[0] * freq + *--coeff;
+            P[0] = P[0] * freq + (*coeff_arr)[k][nPowerTheta-1][nPowerFreq-i-2][0];
+            P[1] = P[1] * freq + (*coeff_arr)[k][nPowerTheta-1][nPowerFreq-i-2][1];
         }
 
         // Evaluate the remaining terms.
         for(unsigned int j = 0; j < nPowerTheta - 1; ++j)
         {
-            Pj[1] = *--coeff;
-            Pj[0] = *--coeff;
+            Pj[0] = (*coeff_arr)[k][nPowerTheta-j-2][nPowerFreq-1][0];
+            Pj[1] = (*coeff_arr)[k][nPowerTheta-j-2][nPowerFreq-1][1];
 
             for(unsigned int i = 0; i < nPowerFreq - 1; ++i)
             {
-                Pj[1] = Pj[1] * freq + *--coeff;
-                Pj[0] = Pj[0] * freq + *--coeff;
+                Pj[0] = Pj[0] * freq + (*coeff_arr)[k][nPowerTheta-j-2][nPowerFreq-i-2][0];
+                Pj[1] = Pj[1] * freq + (*coeff_arr)[k][nPowerTheta-j-2][nPowerFreq-i-2][1];
             }
 
-            P[1] = P[1] * theta + Pj[1];
             P[0] = P[0] * theta + Pj[0];
+            P[1] = P[1] * theta + Pj[1];
         }
-
-        // Because the increment and decrements cancel, the iterator points to
-        // the same location as at the beginning of this iteration of the outer
-        // loop. The next iteration should use the coefficients for the next
-        // harmonic (k), so we move the iterator to the start of that block.
-        coeff += nPowerTheta * nPowerFreq * 2;
 
         // Compute the Jones matrix for the current harmonic, by rotating P over
         // kappa * az, and add it to the result.
