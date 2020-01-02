@@ -80,7 +80,8 @@ void element_response(double freq, double theta, double phi,
     //+ 1)] incrementally.
     int sign = 1, kappa = 1;
 
-    std::complex<double> P[2], Pj[2];
+    std::pair<std::complex<double>, std::complex<double>> P;
+    std::pair<std::complex<double>, std::complex<double>> Pj;
     for(unsigned int k = 0; k < nHarmonics; ++k)
     {
         // Compute the (diagonal) projection matrix P for the current harmonic.
@@ -92,33 +93,29 @@ void element_response(double freq, double theta, double phi,
         // start indexing the block of coefficients at the last element
 
         // Evaluate the highest order term.
-        auto coeff = coeffs.get_coeff(k, nPowerTheta-1, nPowerFreq-1);
-        P[0] = coeff.first;
-        P[1] = coeff.second;
+        P = coeffs.get_coeff(k, nPowerTheta-1, nPowerFreq-1);
 
         for(unsigned int i = 0; i < nPowerFreq - 1; ++i)
         {
-            auto coeff = coeffs.get_coeff(k, nPowerTheta-1, nPowerFreq-i-2);
-            P[0] = P[0] * freq + coeff.first;
-            P[1] = P[1] * freq + coeff.second;
+            auto Pk = coeffs.get_coeff(k, nPowerTheta-1, nPowerFreq-i-2);
+            P.first  = P.first  * freq + Pk.first;
+            P.second = P.second * freq + Pk.second;
         }
 
         // Evaluate the remaining terms.
         for(unsigned int j = 0; j < nPowerTheta - 1; ++j)
         {
-            auto coeff = coeffs.get_coeff(k, nPowerTheta-j-2, nPowerFreq-1);
-            Pj[0] = coeff.first;
-            Pj[1] = coeff.second;
+            Pj = coeffs.get_coeff(k, nPowerTheta-j-2, nPowerFreq-1);
 
             for(unsigned int i = 0; i < nPowerFreq - 1; ++i)
             {
-                auto coeff = coeffs.get_coeff(k, nPowerTheta-j-2, nPowerFreq-i-2);
-                Pj[0] = Pj[0] * freq + coeff.first;
-                Pj[1] = Pj[1] * freq + coeff.second;
+                auto Pk = coeffs.get_coeff(k, nPowerTheta-j-2, nPowerFreq-i-2);
+                Pj.first  = Pj.first  * freq + Pk.first;
+                Pj.second = Pj.second * freq + Pk.second;
             }
 
-            P[0] = P[0] * theta + Pj[0];
-            P[1] = P[1] * theta + Pj[1];
+            P.first  = P.first  * theta + Pj.first;
+            P.second = P.second * theta + Pj.second;
         }
 
         // Compute the Jones matrix for the current harmonic, by rotating P over
@@ -127,10 +124,10 @@ void element_response(double freq, double theta, double phi,
         const double caz = std::cos(angle);
         const double saz = std::sin(angle);
 
-        response[0][0] += caz * P[0];
-        response[0][1] += -saz * P[1];
-        response[1][0] += saz * P[0];
-        response[1][1] += caz * P[1];
+        response[0][0] += caz * P.first;
+        response[0][1] += -saz * P.second;
+        response[1][0] += saz * P.first;
+        response[1][1] += caz * P.second;
 
         // Update sign and kappa.
         sign = -sign;
