@@ -24,6 +24,8 @@
 #include "MathUtil.h"
 
 #include "HamakerElementResponse.h"
+#include "DualDipoleAntenna.h"
+#include "TileAntenna.h"
 
 namespace LOFAR
 {
@@ -35,6 +37,12 @@ Station::Station(const string &name, const vector3r_t &position)
         itsPosition(position),
         itsPhaseReference(position)
 {
+    if (DualDipoleAntenna::m_element_response == nullptr) {
+        DualDipoleAntenna::m_element_response.reset(new HamakerElementResponseLBA);
+    }
+    if (TileAntenna::m_element_response == nullptr) {
+        TileAntenna::m_element_response.reset(new HamakerElementResponseHBA);
+    }
 }
 
 const string &Station::name() const

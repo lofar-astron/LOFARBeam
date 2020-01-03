@@ -31,11 +31,6 @@ namespace LOFAR
 namespace StationResponse
 {
 
-DualDipoleAntenna::DualDipoleAntenna()
-{
-    m_element_response.reset(new HamakerElementResponseHBA());
-}
-
 matrix22c_t DualDipoleAntenna::response(real_t freq,
     const vector3r_t &direction) const
 {
@@ -50,6 +45,8 @@ matrix22c_t DualDipoleAntenna::response(real_t freq,
         reinterpret_cast<std::complex<double> (&)[2][2]>(response));
     return response;
 }
+
+std::unique_ptr<ElementResponse> DualDipoleAntenna::m_element_response = nullptr;
 
 } //# namespace StationResponse
 } //# namespace LOFAR

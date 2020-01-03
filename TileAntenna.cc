@@ -31,10 +31,7 @@ namespace StationResponse
 {
 
 TileAntenna::TileAntenna(const TileConfig &config)
-    :   itsConfig(config)
-{
-    m_element_response.reset(new HamakerElementResponseHBA());
-}
+    :   itsConfig(config) {}
 
 void TileAntenna::setConfig(const TileConfig &config)
 {
@@ -95,6 +92,8 @@ matrix22c_t TileAntenna::elementResponse(real_t freq,
         reinterpret_cast<std::complex<double> (&)[2][2]>(response));
     return response;
 }
+
+std::unique_ptr<ElementResponse> TileAntenna::m_element_response = nullptr;
 
 } //# namespace StationResponse
 } //# namespace LOFAR
