@@ -37,11 +37,11 @@ Station::Station(const string &name, const vector3r_t &position)
         itsPosition(position),
         itsPhaseReference(position)
 {
-    if (DualDipoleAntenna::m_element_response == nullptr) {
-        DualDipoleAntenna::m_element_response.reset(new HamakerElementResponseLBA);
+    if (DualDipoleAntenna::itsElementResponse == nullptr) {
+        DualDipoleAntenna::itsElementResponse.reset(new HamakerElementResponseLBA);
     }
-    if (TileAntenna::m_element_response == nullptr) {
-        TileAntenna::m_element_response.reset(new HamakerElementResponseHBA);
+    if (TileAntenna::itsElementResponse == nullptr) {
+        TileAntenna::itsElementResponse.reset(new HamakerElementResponseHBA);
     }
 }
 

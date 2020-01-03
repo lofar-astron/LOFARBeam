@@ -88,12 +88,12 @@ matrix22c_t TileAntenna::elementResponse(real_t freq,
     thetaphi[1] -= 5.0 * Constants::pi_4;
 
     matrix22c_t response;
-    m_element_response->element_response(freq, thetaphi[0], thetaphi[1],
+    itsElementResponse->element_response(freq, thetaphi[0], thetaphi[1],
         reinterpret_cast<std::complex<double> (&)[2][2]>(response));
     return response;
 }
 
-std::unique_ptr<ElementResponse> TileAntenna::m_element_response = nullptr;
+std::unique_ptr<ElementResponse> TileAntenna::itsElementResponse = nullptr;
 
 } //# namespace StationResponse
 } //# namespace LOFAR
