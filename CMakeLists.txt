@@ -28,6 +28,7 @@ add_library(stationresponse SHARED
   AntennaModelHBA.cc
   AntennaModelLBA.cc
   DualDipoleAntenna.cc
+  ElementResponseModel.cc
   HamakerElementResponse.cc
   ITRFConverter.cc
   ITRFDirection.cc
@@ -52,10 +53,12 @@ install (FILES
   Types.h
   ITRFConverter.h
   ITRFDirection.h
+  ElementResponseModel.h
 DESTINATION include/StationResponse)
 
 install (FILES
   ElementResponse.h
+  ElementResponseModel.h
 DESTINATION include/ElementResponse)
 
 find_package(Doxygen)

@@ -32,16 +32,37 @@ namespace LOFAR
 namespace StationResponse
 {
 
-Station::Station(const string &name, const vector3r_t &position)
+Station::Station(
+    const string &name,
+    const vector3r_t &position,
+    const ElementResponseModel model)
     :   itsName(name),
         itsPosition(position),
         itsPhaseReference(position)
 {
-    if (DualDipoleAntenna::itsElementResponse == nullptr) {
-        DualDipoleAntenna::itsElementResponse.reset(new HamakerElementResponseLBA);
+    if (itsModel != ElementResponseModel::Unknown &&
+        itsModel != model)
+    {
+        throw std::runtime_error("Every station must have the same element response model.");
+    } else {
+        itsModel = model;
     }
-    if (TileAntenna::itsElementResponse == nullptr) {
-        TileAntenna::itsElementResponse.reset(new HamakerElementResponseHBA);
+
+    switch (model)
+    {
+        case Hamaker:
+            if (DualDipoleAntenna::itsElementResponse == nullptr) {
+                DualDipoleAntenna::itsElementResponse.reset(new HamakerElementResponseLBA);
+            }
+            if (TileAntenna::itsElementResponse == nullptr) {
+                TileAntenna::itsElementResponse.reset(new HamakerElementResponseHBA);
+            }
+            break;
+        default:
+            std::stringstream message;
+            message << "The requested element response model '"
+                    << model << "' is not implemented.";
+            throw std::runtime_error(message.str());
     }
 }
 
