@@ -29,8 +29,7 @@
 
 #include "AntennaModelLBA.h"
 
-#include "HamakerCoeff.h"
-#include "config.h"
+#include "ElementResponse.h"
 
 #include <memory>
 
@@ -56,7 +55,7 @@ public:
         const final override;
 
 private:
-    HamakerCoefficients* lba_coeff;
+    std::unique_ptr<ElementResponse> m_element_response;
 };
 
 // @}

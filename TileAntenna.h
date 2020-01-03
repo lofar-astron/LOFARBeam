@@ -28,8 +28,7 @@
 
 #include "AntennaModelHBA.h"
 
-#include "HamakerCoeff.h"
-#include "config.h"
+#include "ElementResponse.h"
 
 #include <array>
 #include <memory>
@@ -66,7 +65,7 @@ public:
 
 private:
     TileConfig  itsConfig;
-    HamakerCoefficients* hba_coeff;
+    std::unique_ptr<ElementResponse> m_element_response;
 };
 
 // @}

@@ -23,6 +23,8 @@
 #include "Station.h"
 #include "MathUtil.h"
 
+#include "HamakerElementResponse.h"
+
 namespace LOFAR
 {
 namespace StationResponse

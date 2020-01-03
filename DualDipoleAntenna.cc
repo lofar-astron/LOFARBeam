@@ -24,7 +24,7 @@
 #include "DualDipoleAntenna.h"
 #include "Constants.h"
 #include "MathUtil.h"
-#include "ElementResponse.h"
+#include "HamakerElementResponse.h"
 
 namespace LOFAR
 {
@@ -33,11 +33,7 @@ namespace StationResponse
 
 DualDipoleAntenna::DualDipoleAntenna()
 {
-    std::stringstream ss;
-    ss << LOFARBEAM_DATA_DIR << "/";
-    ss << "HamakerLBACoeff.h5";
-    std::string s = ss.str();
-    lba_coeff = new HamakerCoefficients(s);
+    m_element_response.reset(new HamakerElementResponseHBA());
 }
 
 matrix22c_t DualDipoleAntenna::response(real_t freq,
@@ -50,9 +46,8 @@ matrix22c_t DualDipoleAntenna::response(real_t freq,
     vector2r_t thetaphi = cart2thetaphi(direction);
     thetaphi[1] -= 5.0 * Constants::pi_4;
     matrix22c_t response;
-    element_response_lba(freq, thetaphi[0], thetaphi[1],
-        reinterpret_cast<std::complex<double> (&)[2][2]>(response),
-        *lba_coeff);
+    m_element_response->element_response(freq, thetaphi[0], thetaphi[1],
+        reinterpret_cast<std::complex<double> (&)[2][2]>(response));
     return response;
 }
 

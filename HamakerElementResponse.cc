@@ -1,56 +1,28 @@
-//# ElementResponse.cc: Functions to compute the (idealized) response of a LOFAR
+//# HamakerElementResponse.cc:
+//# Functions to compute the (idealized) response of a LOFAR
 //# LBA or HBA dual dipole antenna.
-//#
-//# Copyright (C) 2011
-//# ASTRON (Netherlands Institute for Radio Astronomy)
-//# P.O.Box 2, 7990 AA Dwingeloo, The Netherlands
-//#
-//# This file is part of the LOFAR software suite.
-//# The LOFAR software suite is free software: you can redistribute it and/or
-//# modify it under the terms of the GNU General Public License as published
-//# by the Free Software Foundation, either version 3 of the License, or
-//# (at your option) any later version.
-//#
-//# The LOFAR software suite is distributed in the hope that it will be useful,
-//# but WITHOUT ANY WARRANTY; without even the implied warranty of
-//# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//# GNU General Public License for more details.
-//#
-//# You should have received a copy of the GNU General Public License along
-//# with the LOFAR software suite. If not, see <http://www.gnu.org/licenses/>.
-//#
-//# $Id$
-
-#include "ElementResponse.h"
 
 #include "config.h"
 
-#include <cmath>
-#include <sstream>
+#include "HamakerElementResponse.h"
 
 // PI / 2.0
 const double pi_2 = 1.570796326794896619231322;
 
-namespace LOFAR
+std::string HamakerElementResponse::get_path(
+    const char* filename) const
 {
-
-void element_response_lba(double freq, double theta, double phi,
-    std::complex<double> (&response)[2][2],
-    HamakerCoefficients& lba_coeff)
-{
-    element_response(freq, theta, phi, response, lba_coeff);
+    std::stringstream ss;
+    ss << LOFARBEAM_DATA_DIR << "/";
+    ss << filename;
+    return ss.str();
 }
 
-void element_response_hba(double freq, double theta, double phi,
-    std::complex<double> (&response)[2][2],
-    HamakerCoefficients& hba_coeff)
-{
-    element_response(freq, theta, phi, response, hba_coeff);
-}
-
-void element_response(double freq, double theta, double phi,
-    std::complex<double> (&response)[2][2],
-    HamakerCoefficients& coeffs)
+void HamakerElementResponse::element_response(
+    double freq,
+    double theta,
+    double phi,
+    std::complex<double> (&response)[2][2]) const
 {
     // Initialize the response to zero.
     response[0][0] = 0.0;
@@ -64,12 +36,11 @@ void element_response(double freq, double theta, double phi,
         return;
     }
 
-
-    const double freq_center       = coeffs.get_freq_center();
-    const double freq_range        = coeffs.get_freq_range();
-    const unsigned int nHarmonics  = coeffs.get_nHarmonics();
-    const unsigned int nPowerTheta = coeffs.get_nPowerTheta();
-    const unsigned int nPowerFreq  = coeffs.get_nPowerFreq();;
+    const double freq_center       = m_coeffs->get_freq_center();
+    const double freq_range        = m_coeffs->get_freq_range();
+    const unsigned int nHarmonics  = m_coeffs->get_nHarmonics();
+    const unsigned int nPowerTheta = m_coeffs->get_nPowerTheta();
+    const unsigned int nPowerFreq  = m_coeffs->get_nPowerFreq();;
 
     // The model is parameterized in terms of a normalized frequency in the
     // range [-1, 1]. The appropriate conversion is taken care of below.
@@ -93,11 +64,11 @@ void element_response(double freq, double theta, double phi,
         // start indexing the block of coefficients at the last element
 
         // Evaluate the highest order term.
-        P = coeffs.get_coeff(k, nPowerTheta-1, nPowerFreq-1);
+        P = m_coeffs->get_coeff(k, nPowerTheta-1, nPowerFreq-1);
 
         for(unsigned int i = 0; i < nPowerFreq - 1; ++i)
         {
-            auto Pk = coeffs.get_coeff(k, nPowerTheta-1, nPowerFreq-i-2);
+            auto Pk = m_coeffs->get_coeff(k, nPowerTheta-1, nPowerFreq-i-2);
             P.first  = P.first  * freq + Pk.first;
             P.second = P.second * freq + Pk.second;
         }
@@ -105,11 +76,11 @@ void element_response(double freq, double theta, double phi,
         // Evaluate the remaining terms.
         for(unsigned int j = 0; j < nPowerTheta - 1; ++j)
         {
-            Pj = coeffs.get_coeff(k, nPowerTheta-j-2, nPowerFreq-1);
+            Pj = m_coeffs->get_coeff(k, nPowerTheta-j-2, nPowerFreq-1);
 
             for(unsigned int i = 0; i < nPowerFreq - 1; ++i)
             {
-                auto Pk = coeffs.get_coeff(k, nPowerTheta-j-2, nPowerFreq-i-2);
+                auto Pk = m_coeffs->get_coeff(k, nPowerTheta-j-2, nPowerFreq-i-2);
                 Pj.first  = Pj.first  * freq + Pk.first;
                 Pj.second = Pj.second * freq + Pk.second;
             }
@@ -133,7 +104,16 @@ void element_response(double freq, double theta, double phi,
         sign = -sign;
         kappa += 2;
     }
-
 }
 
-} //# namespace LOFAR
+HamakerElementResponseHBA::HamakerElementResponseHBA()
+{
+    std::string path = get_path("HamakerHBACoeff.h5");
+    m_coeffs.reset(new HamakerCoefficients(path));
+}
+
+HamakerElementResponseLBA::HamakerElementResponseLBA()
+{
+    std::string path = get_path("HamakerLBACoeff.h5");
+    m_coeffs.reset(new HamakerCoefficients(path));
+}

@@ -28,7 +28,7 @@ add_library(stationresponse SHARED
   AntennaModelHBA.cc
   AntennaModelLBA.cc
   DualDipoleAntenna.cc
-  ElementResponse.cc
+  HamakerElementResponse.cc
   ITRFConverter.cc
   ITRFDirection.cc
   LofarMetaDataUtil.cc
@@ -38,18 +38,11 @@ add_library(stationresponse SHARED
   Types.cc
   HamakerCoeff.cc)
 
-add_library(elementresponse SHARED
-  ElementResponse.cc)
-
 set_target_properties(stationresponse PROPERTIES VERSION 3)
-set_target_properties(elementresponse PROPERTIES VERSION 3)
 
-# The elementresponse lib does not require casacore, so
-# linking casacore only to stationresponse is enough.
 target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
 
 install (TARGETS stationresponse DESTINATION lib)
-install (TARGETS elementresponse DESTINATION lib)
 
 install (FILES
   AntennaField.h
