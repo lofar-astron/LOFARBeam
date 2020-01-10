@@ -30,6 +30,8 @@ add_library(stationresponse SHARED
   DualDipoleAntenna.cc
   ElementResponseModel.cc
   HamakerElementResponse.cc
+  OSKARElementResponse.cc
+  oskar/oskar_evaluate_dipole_pattern.cc
   ITRFConverter.cc
   ITRFDirection.cc
   LofarMetaDataUtil.cc

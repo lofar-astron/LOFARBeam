@@ -24,6 +24,7 @@
 #include "MathUtil.h"
 
 #include "HamakerElementResponse.h"
+#include "OSKARElementResponse.h"
 #include "DualDipoleAntenna.h"
 #include "TileAntenna.h"
 
@@ -57,6 +58,10 @@ Station::Station(
             if (TileAntenna::itsElementResponse == nullptr) {
                 TileAntenna::itsElementResponse.reset(new HamakerElementResponseHBA);
             }
+            break;
+        case OSKAR:
+            DualDipoleAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
+            TileAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
             break;
         default:
             std::stringstream message;
