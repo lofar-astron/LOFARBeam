@@ -18,7 +18,7 @@
 # with the LOFAR software suite. If not, see <http://www.gnu.org/licenses/>.
 #
 # $Id: __init__.py 33126 2015-12-11 19:09:42Z dijkema $
-from __future__ import absolute_path, print_function, division
+from __future__ import absolute_import, print_function, division
 
 from . import _stationresponse
 
