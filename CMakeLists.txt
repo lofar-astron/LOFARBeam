@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(lofarbeam)
 
+find_package(HDF5 COMPONENTS C CXX REQUIRED)
+include_directories(${HDF5_INCLUDE_DIR})
+
+set(CMAKE_INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
+message("Storing data in: " ${CMAKE_INSTALL_DATA_DIR})
+install(FILES "${CMAKE_SOURCE_DIR}/HamakerHBACoeff.h5" DESTINATION ${CMAKE_INSTALL_DATA_DIR})
+install(FILES "${CMAKE_SOURCE_DIR}/HamakerLBACoeff.h5" DESTINATION ${CMAKE_INSTALL_DATA_DIR})
+
+configure_file(${CMAKE_SOURCE_DIR}/CMake/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+include_directories(${CMAKE_BINARY_DIR})
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 
 set(CASACORE_MAKE_REQUIRED_EXTERNALS_OPTIONAL TRUE)
@@ -17,27 +28,24 @@ add_library(stationresponse SHARED
   AntennaModelHBA.cc
   AntennaModelLBA.cc
   DualDipoleAntenna.cc
-  ElementResponse.cc
+  ElementResponseModel.cc
+  HamakerElementResponse.cc
+  OSKARElementResponse.cc
+  oskar/oskar_evaluate_dipole_pattern.cc
   ITRFConverter.cc
   ITRFDirection.cc
   LofarMetaDataUtil.cc
   MathUtil.cc
   Station.cc
   TileAntenna.cc
-  Types.cc)
-
-add_library(elementresponse SHARED
-  ElementResponse.cc)
+  Types.cc
+  HamakerCoeff.cc)
 
 set_target_properties(stationresponse PROPERTIES VERSION 3)
-set_target_properties(elementresponse PROPERTIES VERSION 3)
 
-# The elementresponse lib does not require casacore, so
-# linking casacore only to stationresponse is enough.
 target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
 
 install (TARGETS stationresponse DESTINATION lib)
-install (TARGETS elementresponse DESTINATION lib)
 
 install (FILES
   AntennaField.h
@@ -47,10 +55,12 @@ install (FILES
   Types.h
   ITRFConverter.h
   ITRFDirection.h
+  ElementResponseModel.h
 DESTINATION include/StationResponse)
 
 install (FILES
   ElementResponse.h
+  ElementResponseModel.h
 DESTINATION include/ElementResponse)
 
 find_package(Doxygen)

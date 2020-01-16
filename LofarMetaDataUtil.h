@@ -29,6 +29,7 @@
 // LOFAR observations stored in MS format.
 
 #include "Station.h"
+#include "ElementResponseModel.h"
 
 #include <casacore/ms/MeasurementSets/MeasurementSet.h>
 #include <casacore/ms/MeasurementSets/MSAntennaColumns.h>
@@ -42,15 +43,23 @@ namespace StationResponse
 // \addtogroup StationResponse
 // @{
 
-Station::Ptr readStation(const casacore::MeasurementSet &ms, unsigned int id);
+const ElementResponseModel defaultElementResponseModel = ElementResponseModel::Hamaker;
+
+Station::Ptr readStation(
+    const casacore::MeasurementSet &ms,
+    unsigned int id,
+    const ElementResponseModel model = defaultElementResponseModel);
 
 template <typename T>
-void readStations(const casacore::MeasurementSet &ms, T out_it)
+void readStations(
+    const casacore::MeasurementSet &ms,
+    T out_it,
+    const ElementResponseModel model = defaultElementResponseModel)
 {
     casacore::ROMSAntennaColumns antenna(ms.antenna());
     for(unsigned int i = 0; i < antenna.nrow(); ++i)
     {
-        *out_it++ = readStation(ms, i);
+        *out_it++ = readStation(ms, i, model);
     }
 }
 

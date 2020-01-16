@@ -24,7 +24,7 @@
 #include "DualDipoleAntenna.h"
 #include "Constants.h"
 #include "MathUtil.h"
-#include "ElementResponse.h"
+#include "HamakerElementResponse.h"
 
 namespace LOFAR
 {
@@ -41,10 +41,12 @@ matrix22c_t DualDipoleAntenna::response(real_t freq,
     vector2r_t thetaphi = cart2thetaphi(direction);
     thetaphi[1] -= 5.0 * Constants::pi_4;
     matrix22c_t response;
-    element_response_lba(freq, thetaphi[0], thetaphi[1],
+    itsElementResponse->element_response(freq, thetaphi[0], thetaphi[1],
         reinterpret_cast<std::complex<double> (&)[2][2]>(response));
     return response;
 }
+
+std::unique_ptr<ElementResponse> DualDipoleAntenna::itsElementResponse = nullptr;
 
 } //# namespace StationResponse
 } //# namespace LOFAR

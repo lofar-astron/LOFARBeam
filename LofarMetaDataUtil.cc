@@ -259,7 +259,10 @@ void readStationPhaseReference(const Table &table, unsigned int id,
     }
 }
 
-Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
+Station::Ptr readStation(
+    const MeasurementSet &ms,
+    unsigned int id,
+    const ElementResponseModel model)
 {
     ROMSAntennaColumns antenna(ms.antenna());
     assert(antenna.nrow() > id && !antenna.flagRow()(id));
@@ -274,7 +277,7 @@ Station::Ptr readStation(const MeasurementSet &ms, unsigned int id)
     const vector3r_t position = {{mvPosition(0), mvPosition(1), mvPosition(2)}};
 
     // Create station.
-    Station::Ptr station(new Station(name, position));
+    Station::Ptr station(new Station(name, position, model));
 
     // Read phase reference position (if available).
     readStationPhaseReference(ms.antenna(), id, station);

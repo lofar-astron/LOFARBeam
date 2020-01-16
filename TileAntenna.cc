@@ -23,7 +23,7 @@
 #include "TileAntenna.h"
 #include "Constants.h"
 #include "MathUtil.h"
-#include "ElementResponse.h"
+#include "HamakerElementResponse.h"
 
 namespace LOFAR
 {
@@ -31,9 +31,7 @@ namespace StationResponse
 {
 
 TileAntenna::TileAntenna(const TileConfig &config)
-    :   itsConfig(config)
-{
-}
+    :   itsConfig(config) {}
 
 void TileAntenna::setConfig(const TileConfig &config)
 {
@@ -90,10 +88,12 @@ matrix22c_t TileAntenna::elementResponse(real_t freq,
     thetaphi[1] -= 5.0 * Constants::pi_4;
 
     matrix22c_t response;
-    element_response_hba(freq, thetaphi[0], thetaphi[1],
+    itsElementResponse->element_response(freq, thetaphi[0], thetaphi[1],
         reinterpret_cast<std::complex<double> (&)[2][2]>(response));
     return response;
 }
+
+std::unique_ptr<ElementResponse> TileAntenna::itsElementResponse = nullptr;
 
 } //# namespace StationResponse
 } //# namespace LOFAR

@@ -28,6 +28,7 @@
 
 #include "AntennaField.h"
 #include "Types.h"
+#include "ElementResponseModel.h"
 
 #include <memory>
 #include <vector>
@@ -53,7 +54,10 @@ public:
      *  \param name Name of the station.
      *  \param position Position of the station (ITRF, m).
      */
-    Station(const string &name, const vector3r_t &position);
+    Station(
+        const string &name,
+        const vector3r_t &position,
+        const ElementResponseModel model);
 
     /*!
      *  \brief Return the name of the station.
@@ -306,6 +310,7 @@ private:
     vector3r_t  itsPosition;
     vector3r_t  itsPhaseReference;
     FieldList   itsFields;
+    ElementResponseModel itsModel;
 };
 
 // @}
