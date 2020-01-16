@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(lofarbeam)
 
+add_subdirectory(lobes)
+
 find_package(HDF5 COMPONENTS C CXX REQUIRED)
 include_directories(${HDF5_INCLUDE_DIR})
 
@@ -87,7 +89,7 @@ if (${PYTHON_VERSION_MAJOR} VERSION_LESS "3")
   message(STATUS "Python library ${PYTHON_LIBRARIES}")
   set(BOOST_PY_FOUND TRUE)
 else (${PYTHON_VERSION_MAJOR} VERSION_LESS "3")
-  find_package (Boost REQUIRED COMPONENTS python3 numpy3)
+  find_package (Boost REQUIRED COMPONENTS python numpy)
   find_package (Casacore REQUIRED COMPONENTS python3)
   message(STATUS "Boost python library: ${Boost_PYTHON3_LIBRARY}")
   message(STATUS "Boost numpy library: ${Boost_NUMPY3_LIBRARY}")
