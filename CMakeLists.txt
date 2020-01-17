@@ -4,7 +4,9 @@ project(lofarbeam)
 
 add_subdirectory(lobes)
 
-find_package(HDF5 COMPONENTS C CXX REQUIRED)
+cmake_policy(SET CMP0074 NEW)
+
+find_package(HDF5 COMPONENTS CXX REQUIRED)
 include_directories(${HDF5_INCLUDE_DIR})
 
 set(CMAKE_INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
