@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(lofarbeam)
 
+add_subdirectory(external)
+
 add_subdirectory(lobes)
 
 cmake_policy(SET CMP0074 NEW)
