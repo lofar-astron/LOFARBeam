@@ -22,6 +22,5 @@ Install Eigen3 into LOFARBeam source tree
     git checkout 'master@{2020-01-01 00:00:00}'
     mkdir build
     cd build
-    cmake .. -DCMAKE_INSTALL_PREFIX=<srcdir>/LOFARBeam/external/eigen
+    cmake .. -DCMAKE_INSTALL_PREFIX=<srcdir>/LOFARBeam/external/eigen -DEIGEN_BUILD_PKGCONFIG=Off
     make install
-
