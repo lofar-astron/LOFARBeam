@@ -46,7 +46,7 @@ add_library(stationresponse SHARED
 
 set_target_properties(stationresponse PROPERTIES VERSION 3)
 
-target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
+target_link_libraries(stationresponse ${CASACORE_LIBRARIES} lobes)
 
 target_link_libraries(stationresponse hamaker oskar)
 

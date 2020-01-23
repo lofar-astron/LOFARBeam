@@ -24,7 +24,8 @@
 #include "MathUtil.h"
 
 #include "hamaker/HamakerElementResponse.h"
-#include "oskar/OskarElementResponse.h"
+#include "oskar/OSKARElementResponse.h"
+#include "lobes/LOBESElementResponse.h"
 #include "DualDipoleAntenna.h"
 #include "TileAntenna.h"
 
@@ -39,46 +40,23 @@ Station::Station(
     const ElementResponseModel model)
     :   itsName(name),
         itsPosition(position),
-        itsPhaseReference(position)
+        itsPhaseReference(position),
 {
-    if (itsModel != ElementResponseModel::Unknown &&
-        itsModel != model)
-    {
-        throw std::runtime_error("Every station must have the same element response model.");
-    } else {
-        itsModel = model;
-    }
+    setModel(model);
+}
 
+void Station::setModel(const ElementResponseModel model)
+{
     switch (model)
     {
         case Hamaker:
-            if (DualDipoleAntenna::itsElementResponse == nullptr) {
-                DualDipoleAntenna::itsElementResponse.reset(new HamakerElementResponseLBA);
-            }
-            if (TileAntenna::itsElementResponse == nullptr) {
-                TileAntenna::itsElementResponse.reset(new HamakerElementResponseHBA);
-            }
+            itsElementResponse = HamakerElementResponse.getInstance(itsName);
             break;
         case OSKAR:
-        #if 0
-            DualDipoleAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
-            TileAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
-        #else
-            if (DualDipoleAntenna::itsElementResponse == nullptr ||
-                TileAntenna::itsElementResponse == nullptr)
-            {
-                #if 0
-                // TODO: this should work, but causes memory corruption
-                ElementResponse* elementResponseModel = new OskarElementResponseSphericalWave();
-                DualDipoleAntenna::itsElementResponse.reset(elementResponseModel);
-                TileAntenna::itsElementResponse.reset(elementResponseModel);
-                #else
-                // TODO: for now, just create the same model twice
-                DualDipoleAntenna::itsElementResponse.reset(new OskarElementResponseSphericalWave());
-                TileAntenna::itsElementResponse.reset(new OskarElementResponseSphericalWave());
-                #endif
-            }
-        #endif
+            itsElementResponse = OSKARElementResponse.getInstance();
+            break;
+        case LOBES:
+            itsElementResponse = LOBESElementResponse.getInstance();
             break;
         default:
             std::stringstream message;

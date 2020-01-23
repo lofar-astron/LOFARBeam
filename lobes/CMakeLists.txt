@@ -2,7 +2,7 @@ find_package(pybind11 REQUIRED)
 find_package (Eigen3 REQUIRED NO_MODULE)
 find_package(HDF5 COMPONENTS C CXX REQUIRED)
 
-pybind11_add_module(lobes lobes.cc ElementResponse.cc)
+pybind11_add_module(lobes SHARED lobes.cc ElementResponse.cc)
 
 configure_file(test.py test.py COPYONLY)
 

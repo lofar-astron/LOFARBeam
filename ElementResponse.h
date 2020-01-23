@@ -2,8 +2,9 @@
 #define ELEMENT_RESPONSE_H
 
 #include <complex>
+#include "Response.h"
 
-class ElementResponse
+class ElementResponse : private Response
 {
 public:
     virtual void element_response(

@@ -29,6 +29,7 @@
 #include "AntennaField.h"
 #include "Types.h"
 #include "ElementResponseModel.h"
+#include "Response.h"
 
 #include <memory>
 #include <vector>
@@ -41,7 +42,7 @@ namespace StationResponse
 // \addtogroup StationResponse
 // @{
 
-class Station
+class Station : private Response
 {
 public:
     typedef std::shared_ptr<Station>             Ptr;
@@ -159,6 +160,12 @@ public:
     matrix22c_t response(real_t time, real_t freq, const vector3r_t &direction,
         real_t freq0, const vector3r_t &station0, const vector3r_t &tile0, const bool rotate = true)
         const;
+
+    virtual void response(
+        double freq,
+        double theta,
+        double phi,
+        std::complex<double> (&response)[2][2]) const {}
 
     /*!
      *  \brief Compute the array factor of the station for a plane wave of
