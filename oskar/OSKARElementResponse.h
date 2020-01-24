@@ -15,3 +15,13 @@ public:
         double phi,
         std::complex<double> (&response)[2][2]) const final override;
 };
+
+class OSKARElementResponseSphericalWave : public OSKARElementResponse
+{
+public:
+    virtual void element_response(
+        double freq,
+        double theta,
+        double phi,
+        std::complex<double> (&response)[2][2]) const final override;
+};

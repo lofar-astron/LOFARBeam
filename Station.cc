@@ -60,8 +60,14 @@ Station::Station(
             }
             break;
         case OSKAR:
+        std::clog << "initialize oskar!" << std::endl;
+        #if 0
             DualDipoleAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
             TileAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
+        #else
+            DualDipoleAntenna::itsElementResponse.reset(new OSKARElementResponseSphericalWave());
+            TileAntenna::itsElementResponse.reset(new OSKARElementResponseSphericalWave());
+        #endif
             break;
         default:
             std::stringstream message;
