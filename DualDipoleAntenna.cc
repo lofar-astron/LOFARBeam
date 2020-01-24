@@ -24,7 +24,6 @@
 #include "DualDipoleAntenna.h"
 #include "Constants.h"
 #include "MathUtil.h"
-#include "HamakerElementResponse.h"
 
 namespace LOFAR
 {

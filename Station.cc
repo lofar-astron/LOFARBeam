@@ -23,7 +23,7 @@
 #include "Station.h"
 #include "MathUtil.h"
 
-#include "HamakerElementResponse.h"
+#include "hamaker/HamakerElementResponse.h"
 #include "oskar/OSKARElementResponse.h"
 #include "DualDipoleAntenna.h"
 #include "TileAntenna.h"
