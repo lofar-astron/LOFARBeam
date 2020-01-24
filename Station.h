@@ -310,7 +310,7 @@ private:
     vector3r_t  itsPosition;
     vector3r_t  itsPhaseReference;
     FieldList   itsFields;
-    ElementResponseModel itsModel;
+    ElementResponseModel itsModel = ElementResponseModel::Unknown;
 };
 
 // @}
