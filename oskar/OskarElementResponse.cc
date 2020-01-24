@@ -1,4 +1,7 @@
-#include "OSKARElementResponse.h"
+#include "config.h"
+
+#include "OskarElementResponse.h"
+#include "OskarSphericalWaveCoeff.h"
 
 #include "oskar_vector_types.h"
 #include "oskar_helper.h"
@@ -37,17 +40,39 @@ void oskar_evaluate_spherical_wave_sum_double(
     const std::complex<double>* alpha,
     std::complex<double>* pattern);
 
-void OSKARElementResponseSphericalWave::element_response(
+void OskarElementResponseSphericalWave::element_response(
     double freq,
     double theta,
     double phi,
     std::complex<double> (&response)[2][2]) const
 {
-    int l_max = 1; // TODO
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if (!m_coeffs->read_frequency(freq)) {
+        return;
+    }
+
+    int l_max = m_coeffs->get_l_max();
+    int element = 0; // TODO
     std::complex<double>* response_ptr = (std::complex<double> *) response;
-    std::complex<double>* alpha_ptr; // TODO
+    std::complex<double>* alpha_ptr = m_coeffs->get_alpha_ptr(element);
 
     double phi_x = phi;
     double phi_y = phi + M_PI/2;
     oskar_evaluate_spherical_wave_sum_double(1, &theta, &phi_x, &phi_y, l_max, alpha_ptr, response_ptr);
+}
+
+std::string OskarElementResponseSphericalWave::get_path(
+    const char* filename) const
+{
+    std::stringstream ss;
+    ss << LOFARBEAM_DATA_DIR << "/";
+    ss << filename;
+    return ss.str();
+}
+
+OskarElementResponseSphericalWave::OskarElementResponseSphericalWave()
+{
+    std::string path = get_path("oskar.h5");
+    m_coeffs.reset(new OskarSphericalWaveCoefficients(path));
 }
