@@ -2,8 +2,15 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(lofarbeam)
 
+# Configure directory for data files
+set(CMAKE_INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
+message("Storing data in: " ${CMAKE_INSTALL_DATA_DIR})
+configure_file(${CMAKE_SOURCE_DIR}/CMake/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+
 add_subdirectory(external)
 
+# Add element models
+add_subdirectory(hamaker)
 add_subdirectory(lobes)
 add_subdirectory(oskar)
 
@@ -12,13 +19,6 @@ cmake_policy(SET CMP0074 NEW)
 find_package(HDF5 COMPONENTS CXX REQUIRED)
 include_directories(${HDF5_INCLUDE_DIR})
 
-set(CMAKE_INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
-message("Storing data in: " ${CMAKE_INSTALL_DATA_DIR})
-install(FILES "${CMAKE_SOURCE_DIR}/HamakerHBACoeff.h5" DESTINATION ${CMAKE_INSTALL_DATA_DIR})
-install(FILES "${CMAKE_SOURCE_DIR}/HamakerLBACoeff.h5" DESTINATION ${CMAKE_INSTALL_DATA_DIR})
-
-configure_file(${CMAKE_SOURCE_DIR}/CMake/config.h.in ${CMAKE_BINARY_DIR}/config.h)
-include_directories(${CMAKE_BINARY_DIR})
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 
@@ -36,21 +36,19 @@ add_library(stationresponse SHARED
   AntennaModelLBA.cc
   DualDipoleAntenna.cc
   ElementResponseModel.cc
-  HamakerElementResponse.cc
   ITRFConverter.cc
   ITRFDirection.cc
   LofarMetaDataUtil.cc
   MathUtil.cc
   Station.cc
   TileAntenna.cc
-  Types.cc
-  HamakerCoeff.cc)
+  Types.cc)
 
 set_target_properties(stationresponse PROPERTIES VERSION 3)
 
 target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
 
-target_link_libraries(stationresponse oskar)
+target_link_libraries(stationresponse hamaker oskar)
 
 install (TARGETS stationresponse DESTINATION lib)
 
