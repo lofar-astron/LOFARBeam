@@ -5,6 +5,7 @@ project(lofarbeam)
 add_subdirectory(external)
 
 add_subdirectory(lobes)
+add_subdirectory(oskar)
 
 cmake_policy(SET CMP0074 NEW)
 
@@ -36,8 +37,6 @@ add_library(stationresponse SHARED
   DualDipoleAntenna.cc
   ElementResponseModel.cc
   HamakerElementResponse.cc
-  OSKARElementResponse.cc
-  oskar/oskar_evaluate_dipole_pattern.cc
   ITRFConverter.cc
   ITRFDirection.cc
   LofarMetaDataUtil.cc
@@ -50,6 +49,8 @@ add_library(stationresponse SHARED
 set_target_properties(stationresponse PROPERTIES VERSION 3)
 
 target_link_libraries(stationresponse ${CASACORE_LIBRARIES})
+
+target_link_libraries(stationresponse oskar)
 
 install (TARGETS stationresponse DESTINATION lib)
 

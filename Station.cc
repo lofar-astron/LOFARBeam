@@ -24,7 +24,7 @@
 #include "MathUtil.h"
 
 #include "HamakerElementResponse.h"
-#include "OSKARElementResponse.h"
+#include "oskar/OSKARElementResponse.h"
 #include "DualDipoleAntenna.h"
 #include "TileAntenna.h"
 

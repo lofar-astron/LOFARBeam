@@ -1,7 +1,7 @@
 #include "OSKARElementResponse.h"
 
-#include "oskar/oskar_vector_types.h"
-#include "oskar/oskar_helper.h"
+#include "oskar_vector_types.h"
+#include "oskar_helper.h"
 
 #include <iostream>
 
