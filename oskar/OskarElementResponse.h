@@ -32,4 +32,6 @@ protected:
     std::string get_path(const char*) const;
 
     std::unique_ptr<OskarSphericalWaveCoefficients> m_coeffs;
+
+    mutable std::mutex m_mutex;
 };

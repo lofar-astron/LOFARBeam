@@ -92,7 +92,7 @@ matrix22c_t TileAntenna::elementResponse(real_t freq,
     return response;
 }
 
-std::unique_ptr<ElementResponse> TileAntenna::itsElementResponse = nullptr;
+std::shared_ptr<ElementResponse> TileAntenna::itsElementResponse = nullptr;
 
 } //# namespace StationResponse
 } //# namespace LOFAR

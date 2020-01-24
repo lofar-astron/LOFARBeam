@@ -23,11 +23,33 @@ size_t OskarSphericalWaveCoefficients::get_l_max() const
 void OskarSphericalWaveCoefficients::read_coeffs(
     std::string& filename)
 {
-    std::cout << "read oskar coeffs: " << filename << std::endl;
-#if 0
     // Open file
-    H5::H5File file(filename, H5F_ACC_RDONLY);
+    m_h5_file.reset(new H5::H5File(filename, H5F_ACC_RDONLY));
 
+    // Disable HDF5 error prints
+    H5::Exception::dontPrint();
+}
+
+bool OskarSphericalWaveCoefficients::read_frequency(
+    const unsigned int freq)
+{
+    if (m_freq != freq) {
+        std::string dataset_name = std::to_string((int) (freq / 1e6));
+        std::cout << "read oskar dataset: " << dataset_name << std::endl;
+        try {
+            H5::DataSet dataset = m_h5_file->openDataSet(dataset_name);
+            m_dataset_available = true;
+        } catch (H5::FileIException& e) {
+            std::cerr << "Could not load dataset for frequency " << dataset_name << " Mhz" << std::endl;
+            m_dataset_available = false;
+        }
+    }
+
+    m_freq = freq;
+    return m_dataset_available;
+}
+
+#if 0
     // Read dataset
     H5::DataSet dataset = file.openDataSet(m_dataset_name);
 
@@ -56,7 +78,6 @@ void OskarSphericalWaveCoefficients::read_coeffs(
     m_coeff.resize(get_nr_coeffs());
     set_coeffs((std::complex<double> *) coeff);
 #endif
-}
 
 
 void OskarSphericalWaveCoefficients::print_coeffs()

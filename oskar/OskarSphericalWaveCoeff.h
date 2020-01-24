@@ -7,6 +7,8 @@
 #include <cassert>
 #include <vector>
 #include <cstring>
+#include <memory>
+#include <mutex>
 
 #include <H5Cpp.h>
 
@@ -25,6 +27,9 @@ class OskarSphericalWaveCoefficients {
         void read_coeffs(
             std::string& filename);
 
+        bool read_frequency(
+            const unsigned int freq);
+
         // Debugging
         void print_coeffs();
 
@@ -32,6 +37,10 @@ class OskarSphericalWaveCoefficients {
         // Parameters
         double m_l_max;
         double m_m_max;
+        unsigned int m_freq = 0;
+        bool m_dataset_available = false;
+        std::unique_ptr<H5::H5File> m_h5_file;
+        std::unique_ptr<H5::DataSet> m_h5_dataset;
 
         // Data
         std::vector<std::complex<double>> m_coeff;

@@ -46,6 +46,12 @@ void OskarElementResponseSphericalWave::element_response(
     double phi,
     std::complex<double> (&response)[2][2]) const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if (!m_coeffs->read_frequency(freq)) {
+        return;
+    }
+
     int l_max = 1; // TODO
     std::complex<double>* response_ptr = (std::complex<double> *) response;
     std::complex<double>* alpha_ptr; // TODO
