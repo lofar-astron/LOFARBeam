@@ -28,7 +28,6 @@
 
 #include <cmath>
 #include <complex>
-#include <iostream>
 
 #include "oskar_vector_types.h"
 #include "oskar_helper.h"

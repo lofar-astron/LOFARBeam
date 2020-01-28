@@ -45,7 +45,7 @@ matrix22c_t DualDipoleAntenna::response(real_t freq,
     return response;
 }
 
-std::unique_ptr<ElementResponse> DualDipoleAntenna::itsElementResponse = nullptr;
+std::shared_ptr<ElementResponse> DualDipoleAntenna::itsElementResponse = nullptr;
 
 } //# namespace StationResponse
 } //# namespace LOFAR

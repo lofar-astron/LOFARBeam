@@ -24,7 +24,7 @@
 #include "MathUtil.h"
 
 #include "hamaker/HamakerElementResponse.h"
-#include "oskar/OSKARElementResponse.h"
+#include "oskar/OskarElementResponse.h"
 #include "DualDipoleAntenna.h"
 #include "TileAntenna.h"
 
@@ -60,8 +60,25 @@ Station::Station(
             }
             break;
         case OSKAR:
+        #if 0
             DualDipoleAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
             TileAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
+        #else
+            if (DualDipoleAntenna::itsElementResponse == nullptr ||
+                TileAntenna::itsElementResponse == nullptr)
+            {
+                #if 0
+                // TODO: this should work, but causes memory corruption
+                ElementResponse* elementResponseModel = new OskarElementResponseSphericalWave();
+                DualDipoleAntenna::itsElementResponse.reset(elementResponseModel);
+                TileAntenna::itsElementResponse.reset(elementResponseModel);
+                #else
+                // TODO: for now, just create the same model twice
+                DualDipoleAntenna::itsElementResponse.reset(new OskarElementResponseSphericalWave());
+                TileAntenna::itsElementResponse.reset(new OskarElementResponseSphericalWave());
+                #endif
+            }
+        #endif
             break;
         default:
             std::stringstream message;

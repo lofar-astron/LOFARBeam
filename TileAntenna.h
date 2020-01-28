@@ -63,7 +63,7 @@ public:
     virtual matrix22c_t elementResponse(real_t freq,
         const vector3r_t &direction) const final override;
 
-    static std::unique_ptr<ElementResponse> itsElementResponse;
+    static std::shared_ptr<ElementResponse> itsElementResponse;
 
 private:
     TileConfig  itsConfig;
