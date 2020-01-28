@@ -105,14 +105,11 @@ void HamakerCoefficients::read_coeffs(
     m_nPowerTheta = dims[1];
     m_nPowerFreq  = dims[2];
 
-    // Read coeff
-    std::complex<double> coeff[m_nHarmonics][m_nPowerTheta][m_nPowerFreq][m_nInner];
-    H5::CompType complex_type = get_complex_double_type();
-    dataset.read(coeff, complex_type, dataspace);
-
-    // Set m_coeff
+    // Read coeffs
     m_coeff.resize(get_nr_coeffs());
-    set_coeffs((std::complex<double> *) coeff);
+    H5::DataType data_type = dataset.getDataType();
+    assert(data_type.getSize() == sizeof(std::complex<double>));
+    dataset.read(m_coeff.data(), data_type, dataspace);
 }
 
 void HamakerCoefficients::write_coeffs(
