@@ -3,8 +3,8 @@
 H5::CompType get_complex_double_type()
 {
     H5::CompType complex_type(sizeof(std::complex<double>));
-    complex_type.insertMember("real", 0, H5::PredType::NATIVE_DOUBLE);
-    complex_type.insertMember("imag", sizeof(double), H5::PredType::NATIVE_DOUBLE);
+    complex_type.insertMember("r", 0, H5::PredType::NATIVE_DOUBLE);
+    complex_type.insertMember("i", sizeof(double), H5::PredType::NATIVE_DOUBLE);
     return complex_type;
 }
 
