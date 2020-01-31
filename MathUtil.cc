@@ -22,10 +22,7 @@
 
 #include "MathUtil.h"
 
-namespace LOFAR
-{
 namespace StationResponse
 {
 
 } //# namespace StationResponse
-} //# namespace LOFAR

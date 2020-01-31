@@ -23,8 +23,8 @@
 #ifndef LOFAR_STATIONRESPONSE_MUTABLEPTR_H
 #define LOFAR_STATIONRESPONSE_MUTABLEPTR_H
 
-namespace LOFAR
-{
+#include <memory>
+
 namespace StationResponse
 {
 
@@ -74,15 +74,14 @@ namespace StationResponse
  * \endcode
  */
 template<typename T>
-class MutablePtr : public std::shared_ptr<T*> {
+class MutablePtr : public std::shared_ptr<std::shared_ptr<T>> {
 public:
-    MutablePtr(T* ptr) : std::shared_ptr<T*>(new T*(ptr)) {}
+    MutablePtr(std::shared_ptr<T> ptr) : std::shared_ptr<std::shared_ptr<T>>(new std::shared_ptr<T>(ptr)) {}
     T& operator*() const { return **(this->get()); }
     T* operator->() const { return *(this->get()); }
-    void set(T* ptr) { *(this->get()) = ptr;}
+    void set(std::shared_ptr<T> ptr) { *(this->get()) = ptr;}
 };
 
 } //# namespace StationResponse
-} //# namespace LOFAR
 
 #endif

@@ -22,10 +22,7 @@
 
 #include "Types.h"
 
-namespace LOFAR
-{
 namespace StationResponse
 {
 
 } //# namespace StationResponse
-} //# namespace LOFAR

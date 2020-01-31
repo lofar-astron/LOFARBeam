@@ -29,7 +29,7 @@
 // LOFAR observations stored in MS format.
 
 #include "Station.h"
-#include "ElementResponseModel.h"
+#include "AntennaModel.h"
 
 #include <casacore/ms/MeasurementSets/MeasurementSet.h>
 #include <casacore/ms/MeasurementSets/MSAntennaColumns.h>

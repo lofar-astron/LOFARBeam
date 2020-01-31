@@ -2,10 +2,10 @@ template<typename T>
 class Singleton
 {
     public:
-        static T& getInstance()
+        static std::shared_ptr<T> getInstance()
         {
-            static T    instance; // Guaranteed to be destroyed.
-                                  // Instantiated on first use.
+            static std::shared_ptr<T>  instance(new T()); // Guaranteed to be destroyed.
+                                                          // Instantiated on first use.
             return instance;
         }
     private:

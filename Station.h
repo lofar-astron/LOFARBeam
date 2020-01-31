@@ -26,28 +26,25 @@
 // \file
 // Representation of the station beam former.
 
-#include "AntennaField.h"
+#include "Element.h"
+#include "AntennaModel.h"
 #include "Types.h"
-#include "ElementResponseModel.h"
-#include "Response.h"
 
 #include <memory>
 #include <vector>
 
-namespace LOFAR
-{
 namespace StationResponse
 {
 
 // \addtogroup StationResponse
 // @{
 
-class Station : private Response
+class Station : public Element
 {
 public:
     typedef std::shared_ptr<Station>             Ptr;
     typedef std::shared_ptr<const Station>       ConstPtr;
-    typedef std::vector<AntennaField::ConstPtr>  FieldList;
+//     typedef std::vector<AntennaField::ConstPtr>  FieldList;
 
     /*!
      *  \brief Construct a new Station instance.
@@ -56,14 +53,16 @@ public:
      *  \param position Position of the station (ITRF, m).
      */
     Station(
-        const string &name,
+        const std::string &name,
         const vector3r_t &position,
-        const ElementResponseModel model);
+        const AntennaModelID model);
+
+    void setModel(const AntennaModelID model);
 
     /*!
      *  \brief Return the name of the station.
      */
-    const string &name() const;
+    const std::string &name() const;
 
     /*!
      *  \brief Return the position of the station (ITRF, m).
@@ -99,7 +98,7 @@ public:
      *
      *  Use this method to add the appropriate antenna fields to the station.
      */
-    void addField(const AntennaField::ConstPtr &field);
+//     void addField(const AntennaField::ConstPtr &field);
 
 
     /*!
@@ -114,19 +113,19 @@ public:
      *  \return An AntennaField::ConstPtr to the requested AntennaField
      *  instance, or an empty AntennaField::ConstPtr if \p i is out of bounds.
      */
-    AntennaField::ConstPtr field(size_t i) const;
+//     AntennaField::ConstPtr field(size_t i) const;
 
     /*!
      *  \brief Return an iterator that points to the beginning of the list of
      *  antenna fields.
      */
-    FieldList::const_iterator beginFields() const;
+//     FieldList::const_iterator beginFields() const;
 
     /*!
      *  \brief Return an iterator that points to the end of the list of antenna
      *  fields.
      */
-    FieldList::const_iterator endFields() const;
+//     FieldList::const_iterator endFields() const;
 
     /*!
      *  \brief Compute the response of the station for a plane wave of frequency
@@ -162,6 +161,7 @@ public:
         const;
 
     virtual void response(
+        double time,
         double freq,
         double theta,
         double phi,
@@ -307,17 +307,20 @@ public:
 
     // @}
 
-private:
-    raw_array_factor_t fieldArrayFactor(const AntennaField::ConstPtr &field,
-        real_t time, real_t freq, const vector3r_t &direction, real_t freq0,
-        const vector3r_t &position0, const vector3r_t &direction0) const;
+    const AntennaModel::Ptr get_antenna_model() {return itsAntennaModel;}
 
 private:
-    string      itsName;
+//     raw_array_factor_t fieldArrayFactor(const AntennaField::ConstPtr &field,
+//         real_t time, real_t freq, const vector3r_t &direction, real_t freq0,
+//         const vector3r_t &position0, const vector3r_t &direction0) const;
+
+private:
+    std::string itsName;
     vector3r_t  itsPosition;
     vector3r_t  itsPhaseReference;
-    FieldList   itsFields;
-    ElementResponseModel itsModel = ElementResponseModel::Unknown;
+//     FieldList   itsFields;
+    AntennaModelID itsAntennaModelID = AntennaModelID::Unknown;
+    AntennaModel::Ptr itsAntennaModel;
 };
 
 // @}
@@ -375,6 +378,5 @@ void Station::arrayFactor(unsigned int count, real_t time, T freq,
 }
 
 } //# namespace StationResponse
-} //# namespace LOFAR
 
 #endif
