@@ -31,6 +31,11 @@
 
 #include "oskar.h"
 
+#include <iostream>
+namespace {
+    int greet() {std::cout << "Greetings from Oskar Dipole!" << std::endl;return 0;}
+}
+
 template<typename FP, typename FP2>
 inline void oskar_dipole(
     FP theta,
@@ -69,16 +74,13 @@ void oskar_evaluate_dipole_pattern(
     FP2* e_theta,
     FP2* e_phi)
 {
+    static int dummy = greet();
     for (int i = 0; i < num_points; i++) {
         const int i_out = i * stride;\
         const int theta_out = i_out + E_theta_offset;\
         const int phi_out   = i_out + E_phi_offset;\
         oskar_dipole<FP, FP2>(theta[i], phi[i], kL, e_theta[theta_out], e_phi[phi_out]);
     }
-}
-
-namespace {
-    int greet() {std::cout << "Greetings from Oskar!" << std::endl;return 0;}
 }
 
 void oskar_evaluate_dipole_pattern_double(
@@ -89,8 +91,6 @@ void oskar_evaluate_dipole_pattern_double(
     const double dipole_length_m,
     std::complex<double>* pattern)
 {
-    static int dummy = greet();
-
     const int stride = 4;
     const int offset = 0;
     const int E_theta_offset = offset;

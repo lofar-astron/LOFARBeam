@@ -32,12 +32,19 @@
 #include "oskar_vector_types.h"
 #include "oskar_helper.h"
 
+#include <iostream>
+namespace {
+    int greet() {std::cout << "Oskar waves spherically at you!" << std::endl;return 0;}
+}
+
+
 template<typename FP, typename FP2, typename FP4c>
 void oskar_evaluate_spherical_wave_sum(
     int num_points, const FP* theta,
     const FP* phi_x, const FP* phi_y, int l_max,
     const FP4c* alpha, int offset, FP4c* pattern)
 {
+    static int dummy = greet();
     FP2 Xp, Xt, Yp, Yt;
     make_zero2(Xp); make_zero2(Xt);
     make_zero2(Yp); make_zero2(Yt);

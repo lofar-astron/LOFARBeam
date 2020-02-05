@@ -52,8 +52,11 @@ void Station::setModel(const ElementResponseModel model)
         case Hamaker:
             itsElementResponse.set(HamakerElementResponse::getInstance(itsName));
             break;
-        case OSKAR:
+        case OSKARDipole:
             itsElementResponse.set(OSKARElementResponseDipole::getInstance());
+            break;
+        case OSKARSphericalWave:
+            itsElementResponse.set(OSKARElementResponseSphericalWave::getInstance());
             break;
         case LOBES:
             itsElementResponse.set(LOBESElementResponse::getInstance(itsName));

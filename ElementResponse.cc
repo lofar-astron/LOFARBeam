@@ -10,7 +10,8 @@ std::ostream& operator<<(std::ostream& os, ElementResponseModel model )
         case Unknown: os << "Unknown"; break;
         case Hamaker: os << "Hamaker"; break;
         case LOBES  : os << "LOBES"; break;
-        case OSKAR  : os << "OSKAR"; break;
+        case OSKARDipole : os << "OSKARDipole"; break;
+        case OSKARSphericalWave : os << "OSKARSphericalWave"; break;
         default     : os.setstate(std::ios_base::failbit);
     }
     return os;

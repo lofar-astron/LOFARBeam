@@ -13,7 +13,8 @@ enum ElementResponseModel {
     Unknown,
     Hamaker,
     LOBES,
-    OSKAR
+    OSKARDipole,
+    OSKARSphericalWave
 };
 
 std::ostream& operator<<(std::ostream& os, ElementResponseModel model);
