@@ -10,6 +10,7 @@
 #include "HamakerElementResponse.h"
 #include "../Singleton.h"
 
+namespace LOFAR {
 namespace StationResponse {
 
 // PI / 2.0
@@ -137,4 +138,6 @@ HamakerElementResponseLBA::HamakerElementResponseLBA()
     std::string path = get_path("HamakerLBACoeff.h5");
     m_coeffs.reset(new HamakerCoefficients(path));
 }
-}
+
+} // namespace StationResponse
+} // namespace LOFAR

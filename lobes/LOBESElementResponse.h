@@ -1,10 +1,11 @@
-#include "../AntennaModel.h"
+#include "../ElementResponse.h"
 
 #include <memory>
 
+namespace LOFAR {
 namespace StationResponse {
 
-class LOBESElementResponse : public AntennaModel
+class LOBESElementResponse : public ElementResponse
 {
 public:
 
@@ -20,3 +21,4 @@ public:
 };
 
 } // namespace StationResponse
+} // namespace LOFAR

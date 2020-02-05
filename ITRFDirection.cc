@@ -26,10 +26,10 @@
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/measures/Measures/MEpoch.h>
 
-namespace LOFAR
-{
-namespace StationResponse
-{
+namespace LOFAR {
+namespace StationResponse {
+
+
     //ITRF position of CS002LBA, just to use a fixed reference
     const vector3r_t ITRFDirection::itsLOFARPosition = {{ 826577.022720000,461022.995082000,5064892.814 }};
 
@@ -93,4 +93,4 @@ vector3r_t ITRFDirection::at(real_t time) const
 
 
 } //# namespace StationResponse
-} //# namespace LOFAR
+} // namespace LOFAR

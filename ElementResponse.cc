@@ -1,6 +1,9 @@
-#include "AntennaModel.h"
+#include "ElementResponse.h"
 
-std::ostream& operator<<(std::ostream& os, ElementResponseModel model)
+namespace LOFAR {
+namespace StationResponse {
+
+std::ostream& operator<<(std::ostream& os, ElementResponseModel model )
 {
     switch (model)
     {
@@ -12,3 +15,6 @@ std::ostream& operator<<(std::ostream& os, ElementResponseModel model)
     }
     return os;
 }
+
+} // namespace StationResponse
+} // namespace LOFAR

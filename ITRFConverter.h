@@ -14,10 +14,8 @@
 
 #include <memory>
 
-namespace LOFAR
-{
-namespace StationResponse
-{
+namespace LOFAR {
+namespace StationResponse {
 
 // \addtogroup StationResponse
 // @{
@@ -45,7 +43,7 @@ private:
 
 // @}
 
-} //# namespace BBS
-} //# namespace LOFAR
+} //# namespace StationResponse
+} // namespace LOFAR
 
 #endif

@@ -14,6 +14,15 @@ add_subdirectory(hamaker)
 add_subdirectory(lobes)
 add_subdirectory(oskar)
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    include(CTest)
+endif()
+
+# Add tests
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+    add_subdirectory(test)
+endif()
+
 cmake_policy(SET CMP0074 NEW)
 
 find_package(HDF5 COMPONENTS CXX REQUIRED)
@@ -29,45 +38,38 @@ include_directories(${CASACORE_INCLUDE_DIR})
 add_compile_options(-std=c++11 -Wall -DNDEBUG -Wl,--no-undefined)
 
 add_library(stationresponse SHARED
-#   AntennaField.cc
-#   AntennaFieldHBA.cc
-#   AntennaFieldLBA.cc
-#   AntennaModelHBA.cc
-#   AntennaModelLBA.cc
-#   DualDipoleAntenna.cc
-#   ElementResponseModel.cc
-#   ITRFConverter.cc
-#   ITRFDirection.cc
-#   LofarMetaDataUtil.cc
-#   MathUtil.cc
+  ElementResponse.cc
+  BeamFormer.cc
+  Element.cc
+  ITRFConverter.cc
+  ITRFDirection.cc
+  LofarMetaDataUtil.cc
+  MathUtil.cc
   Station.cc
-#   TileAntenna.cc
   Types.cc
-  )
+)
 
 set_target_properties(stationresponse PROPERTIES VERSION 3)
 
-target_link_libraries(stationresponse ${CASACORE_LIBRARIES} lobes)
+target_link_libraries(stationresponse PUBLIC ${CASACORE_LIBRARIES})
 
-target_link_libraries(stationresponse hamaker oskar)
+target_link_libraries(stationresponse PUBLIC hamaker lobes oskar)
 
 install (TARGETS stationresponse DESTINATION lib)
 
 install (FILES
-  AntennaField.h
+  Antenna.h
+  BeamFormer.h
   Constants.h
+  Element.h
+  ElementResponse.h
   LofarMetaDataUtil.h
+  MutablePtr.h
   Station.h
   Types.h
   ITRFConverter.h
   ITRFDirection.h
-  ElementResponseModel.h
 DESTINATION include/StationResponse)
-
-install (FILES
-  ElementResponse.h
-  ElementResponseModel.h
-DESTINATION include/ElementResponse)
 
 find_package(Doxygen)
 

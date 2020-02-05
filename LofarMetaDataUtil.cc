@@ -22,11 +22,11 @@
 //# $Id$
 
 #include "LofarMetaDataUtil.h"
-#include "AntennaFieldLBA.h"
-#include "AntennaFieldHBA.h"
+// #include "AntennaFieldLBA.h"
+// #include "AntennaFieldHBA.h"
 #include "MathUtil.h"
-#include "TileAntenna.h"
-#include "DualDipoleAntenna.h"
+// #include "TileAntenna.h"
+// #include "DualDipoleAntenna.h"
 
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/measures/Measures/MPosition.h>
@@ -54,13 +54,12 @@
 #include <casacore/ms/MeasurementSets/MSSpectralWindow.h>
 #include <casacore/ms/MeasurementSets/MSSpWindowColumns.h>
 
-namespace LOFAR
-{
-namespace StationResponse
-{
+namespace LOFAR {
+namespace StationResponse {
 
 using namespace casacore;
-using namespace std;
+
+typedef std::array<vector3r_t, 16>    TileConfig;
 
 bool hasColumn(const Table &table, const string &column)
 {
@@ -77,7 +76,7 @@ Table getSubTable(const Table &table, const string &name)
     return table.keywordSet().asTable(name);
 }
 
-TileAntenna::TileConfig readTileConfig(const Table &table, unsigned int row)
+TileConfig readTileConfig(const Table &table, unsigned int row)
 {
     ROArrayQuantColumn<Double> c_tile_offset(table, "TILE_ELEMENT_OFFSET", "m");
 
@@ -85,7 +84,7 @@ TileAntenna::TileConfig readTileConfig(const Table &table, unsigned int row)
     Matrix<Quantity> aips_offset = c_tile_offset(row);
     assert(aips_offset.ncolumn() == TileAntenna::TileConfig::size());
 
-    TileAntenna::TileConfig config;
+    TileConfig config;
     for(unsigned int i = 0; i < config.size(); ++i)
     {
         config[i][0] = aips_offset(0, i).getValue();
@@ -95,8 +94,8 @@ TileAntenna::TileConfig readTileConfig(const Table &table, unsigned int row)
     return config;
 }
 
-void transformToFieldCoordinates(TileAntenna::TileConfig &config,
-    const AntennaField::CoordinateSystem::Axes &axes)
+void transformToFieldCoordinates(TileConfig &config,
+    const Station::CoordinateSystem::Axes &axes)
 {
     for(unsigned int i = 0; i < config.size(); ++i)
     {
@@ -107,33 +106,33 @@ void transformToFieldCoordinates(TileAntenna::TileConfig &config,
     }
 }
 
-AntennaField::CoordinateSystem readCoordinateSystemAartfaac(
-    const Table &table, unsigned int id)
-{
-    ROArrayQuantColumn<Double> c_position(table, "POSITION", "m");
- 
-    // Read antenna field center (ITRF).
-    Vector<Quantity> aips_position = c_position(id);
-    assert(aips_position.size() == 3);
+// AntennaField::CoordinateSystem readCoordinateSystemAartfaac(
+//     const Table &table, unsigned int id)
+// {
+//     ROArrayQuantColumn<Double> c_position(table, "POSITION", "m");
+//
+//     // Read antenna field center (ITRF).
+//     Vector<Quantity> aips_position = c_position(id);
+//     assert(aips_position.size() == 3);
+//
+//     vector3r_t position = {{aips_position(0).getValue(),
+//         aips_position(1).getValue(), aips_position(2).getValue()}};
+//
+//     TableRecord keywordset = table.keywordSet();
+//     Matrix<double> aips_axes;
+//     keywordset.get("AARTFAAC_COORDINATE_AXES", aips_axes);
+//     assert(aips_axes.shape().isEqual(IPosition(2, 3, 3)));
+//
+//     vector3r_t p = {{aips_axes(0, 0), aips_axes(1, 0), aips_axes(2, 0)}};
+//     vector3r_t q = {{aips_axes(0, 1), aips_axes(1, 1), aips_axes(2, 1)}};
+//     vector3r_t r = {{aips_axes(0, 2), aips_axes(1, 2), aips_axes(2, 2)}};
+//
+//     AntennaField::CoordinateSystem system = {position, {p, q, r}};
+//
+//     return system;
+// }
 
-    vector3r_t position = {{aips_position(0).getValue(),
-        aips_position(1).getValue(), aips_position(2).getValue()}};
-
-    TableRecord keywordset = table.keywordSet();
-    Matrix<double> aips_axes;
-    keywordset.get("AARTFAAC_COORDINATE_AXES", aips_axes);
-    assert(aips_axes.shape().isEqual(IPosition(2, 3, 3)));
-
-    vector3r_t p = {{aips_axes(0, 0), aips_axes(1, 0), aips_axes(2, 0)}};
-    vector3r_t q = {{aips_axes(0, 1), aips_axes(1, 1), aips_axes(2, 1)}};
-    vector3r_t r = {{aips_axes(0, 2), aips_axes(1, 2), aips_axes(2, 2)}};
-
-    AntennaField::CoordinateSystem system = {position, {p, q, r}};
-
-    return system;
-}
-
-AntennaField::CoordinateSystem readCoordinateSystem(const Table &table,
+Station::CoordinateSystem readCoordinateSystem(const Table &table,
     unsigned int id)
 {
     ROArrayQuantColumn<Double> c_position(table, "POSITION", "m");
@@ -157,15 +156,25 @@ AntennaField::CoordinateSystem readCoordinateSystem(const Table &table,
     vector3r_t r = {{aips_axes(0, 2).getValue(), aips_axes(1, 2).getValue(),
         aips_axes(2, 2).getValue()}};
 
-    AntennaField::CoordinateSystem system = {position, {p, q, r}};
-    return system;
+    Station::CoordinateSystem coordinate_system = {position, {p, q, r}};
+    return coordinate_system;
 }
 
-void readAntennae(const Table &table, unsigned int id,
-    const AntennaField::Ptr &field)
+BeamFormer::Ptr make_tile(std::string name, Station::CoordinateSystem coordinate_system,
+                          TileConfig tile_config, ElementResponse::Ptr)
 {
+}
+
+BeamFormer::Ptr readAntennaField(const Table &table, unsigned int id, ElementResponse::Ptr element_response)
+{
+    BeamFormer::Ptr beam_former(new BeamFormer());
+    Station::CoordinateSystem coordinate_system = readCoordinateSystem(table, id);
+
+    ROScalarColumn<String> c_name(table, "NAME");
     ROArrayQuantColumn<Double> c_offset(table, "ELEMENT_OFFSET", "m");
     ROArrayColumn<Bool> c_flag(table, "ELEMENT_FLAG");
+
+    const string &name = c_name(id);
 
     // Read element offsets and flags.
     Matrix<Quantity> aips_offset = c_offset(id);
@@ -174,70 +183,58 @@ void readAntennae(const Table &table, unsigned int id,
     Matrix<Bool> aips_flag = c_flag(id);
     assert(aips_flag.shape().isEqual(IPosition(2, 2, aips_offset.ncolumn())));
 
+    TileConfig tile_config;
+    if(name != "LBA") readTileConfig(table, id);
+
+    transformToFieldCoordinates(tile_config, coordinate_system.axes);
+
     for(size_t i = 0; i < aips_offset.ncolumn(); ++i)
     {
-        AntennaField::Antenna antenna;
-        antenna.position[0] = aips_offset(0, i).getValue();
-        antenna.position[1] = aips_offset(1, i).getValue();
-        antenna.position[2] = aips_offset(2, i).getValue();
-        antenna.enabled[0] = !aips_flag(0, i);
-        antenna.enabled[1] = !aips_flag(1, i);
-        field->addAntenna(antenna);
+        Antenna::Ptr antenna;
+        if(name == "LBA") {
+            antenna = Element::Ptr(new Element(id, element_response));
+        } else {
+            // HBA, HBA0, HBA1
+            antenna = make_tile(name, coordinate_system, tile_config, element_response);
+        }
+        antenna->m_position[0] = aips_offset(0, i).getValue();
+        antenna->m_position[1] = aips_offset(1, i).getValue();
+        antenna->m_position[2] = aips_offset(2, i).getValue();
+        antenna->m_enabled[0] = !aips_flag(0, i);
+        antenna->m_enabled[1] = !aips_flag(1, i);
+        beam_former->add_antenna(antenna);
     }
+    return beam_former;
 }
 
-AntennaField::Ptr readAntennaField(const Table &table, unsigned int id)
-{
-    AntennaField::Ptr field;
-    AntennaField::CoordinateSystem system = readCoordinateSystem(table, id);
 
-    ROScalarColumn<String> c_name(table, "NAME");
-    const string &name = c_name(id);
 
-    if(name == "LBA")
-    {
-        DualDipoleAntenna::Ptr model(new DualDipoleAntenna());
-        field = AntennaField::Ptr(new AntennaFieldLBA(name, system, model));
-    }
-    else // HBA, HBA0, HBA1
-    {
-        TileAntenna::TileConfig config = readTileConfig(table, id);
-        transformToFieldCoordinates(config, system.axes);
-
-        TileAntenna::Ptr model(new TileAntenna(config));
-        field = AntennaField::Ptr(new AntennaFieldHBA(name, system, model));
-    }
-
-    readAntennae(table, id, field);
-    return field;
-}
-
-AntennaField::Ptr readAntennaFieldAartfaac(const Table &table, const string &ant_type,
+BeamFormer::Ptr readAntennaFieldAartfaac(const Table &table, const string &ant_type,
                                            unsigned int id)
 {
-    AntennaField::Ptr field;
-    AntennaField::CoordinateSystem system = readCoordinateSystemAartfaac(table, id);
-
-    if (ant_type == "LBA")
-    {
-        DualDipoleAntenna::Ptr model(new DualDipoleAntenna());
-        field = AntennaField::Ptr(new AntennaFieldLBA(ant_type, system, model));
-    }
-    else // HBA
-    {
-         // TODO: implement this
-         throw std::runtime_error("HBA for Aartfaac is not implemented yet.");
-    }
-
-    // Add only one antenna to the field (no offset, always enabled)
-    AntennaField::Antenna antenna;
-    antenna.position[0] = 0.;
-    antenna.position[1] = 0.;
-    antenna.position[2] = 0.;
-    antenna.enabled[0] = true;
-    antenna.enabled[1] = true;
-
-    field->addAntenna(antenna);
+    BeamFormer::Ptr field;
+//     AntennaField::CoordinateSystem system = readCoordinateSystemAartfaac(table, id);
+//
+//     if (ant_type == "LBA")
+//     {
+//         DualDipoleAntenna::Ptr model(new DualDipoleAntenna());
+//         field = AntennaField::Ptr(new AntennaFieldLBA(ant_type, system, model));
+//     }
+//     else // HBA
+//     {
+//          // TODO: implement this
+//          throw std::runtime_error("HBA for Aartfaac is not implemented yet.");
+//     }
+//
+//     // Add only one antenna to the field (no offset, always enabled)
+//     AntennaField::Antenna antenna;
+//     antenna.position[0] = 0.;
+//     antenna.position[1] = 0.;
+//     antenna.position[2] = 0.;
+//     antenna.enabled[0] = true;
+//     antenna.enabled[1] = true;
+//
+//     field->addAntenna(antenna);
 
     return field;
 }
@@ -292,9 +289,22 @@ Station::Ptr readStation(
         Table tab_field = getSubTable(ms, "LOFAR_ANTENNA_FIELD");
         tab_field = tab_field(tab_field.col("ANTENNA_ID") == static_cast<Int>(id));
 
-        for(size_t i = 0; i < tab_field.nrow(); ++i)
+        if (tab_field.nrow() == 1)
         {
-            station->addField(readAntennaField(tab_field, i));
+            // There is only one field
+            // The Station will consist of the BeamFormer returned by readAntennaField
+            station->set_antenna(readAntennaField(tab_field, 0, station->get_element_response()));
+        }
+        else
+        {
+            // There are multiple fields
+            // The Station will consist of a BeamFormer that combines the fields
+            auto beam_former = BeamFormer::Ptr(new BeamFormer());
+            for(size_t i = 0; i < tab_field.nrow(); ++i)
+            {
+                beam_former->add_antenna(readAntennaField(tab_field, i, station->get_element_response()));
+            }
+            station->set_antenna(beam_former);
         }
     }
     else if (telescope_name == "AARTFAAC")
@@ -304,7 +314,7 @@ Station::Ptr readStation(
         string ant_type = ant_type_col(0);
 
         Table tab_field = getSubTable(ms, "ANTENNA");
-        station -> addField(readAntennaFieldAartfaac(tab_field, ant_type, id));
+        station->set_antenna(readAntennaFieldAartfaac(tab_field, ant_type, id));
     }
 
     return station;
@@ -336,4 +346,4 @@ MDirection readTileBeamDirection(const casacore::MeasurementSet &ms) {
 }
 
 } //# namespace StationResponse
-} //# namespace LOFAR
+} // namespace LOFAR

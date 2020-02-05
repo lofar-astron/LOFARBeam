@@ -31,6 +31,7 @@
 #include <ostream>
 #include <complex>
 
+namespace LOFAR {
 namespace StationResponse
 {
 
@@ -108,5 +109,6 @@ std::ostream &operator<<(std::ostream &out, const std::array<T, N> &obj)
 }
 
 } //# namespace StationResponse
+} // namespace LOFAR
 
 #endif

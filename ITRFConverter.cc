@@ -7,11 +7,11 @@
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/measures/Measures/MEpoch.h>
 
-namespace LOFAR
-{
-namespace StationResponse
-{
-  //TODO: initialize converter with a time (and fixed position) and convert specific directions. Needed for wslean as well as for the makestationresponse executable.
+namespace LOFAR {
+namespace StationResponse {
+
+  //TODO: Initialize converter with a time (and fixed position) and convert specific directions.
+  //      Needed for wslean as well as for the makestationresponse executable.
 
 
 ITRFConverter::ITRFConverter(real_t time)
@@ -82,4 +82,4 @@ casacore::MDirection ITRFConverter::toDirection(const casacore::MDirection &dire
 
 
 } //# namespace StationResponse
-} //# namespace LOFAR
+} // namespace LOFAR

@@ -1,10 +1,12 @@
-#include "../AntennaModel.h"
+#include "../ElementResponse.h"
 #include "HamakerCoeff.h"
 
 #include <memory>
 
+namespace LOFAR {
 namespace StationResponse {
-class HamakerElementResponse : public AntennaModel
+
+class HamakerElementResponse : public ElementResponse
 {
 public:
     virtual void response(
@@ -32,4 +34,6 @@ class HamakerElementResponseLBA : public HamakerElementResponse
 public:
     HamakerElementResponseLBA();
 };
-}
+
+} // namespace StationResponse
+} // namespace LOFAR

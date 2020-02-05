@@ -1,3 +1,6 @@
+namespace LOFAR {
+namespace StationResponse {
+
 template<typename T>
 class Singleton
 {
@@ -16,3 +19,5 @@ class Singleton
         void operator=(Singleton const&)  = delete;
 
 };
+} // namespace StationResponse
+} // namespace LOFAR

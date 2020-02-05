@@ -26,20 +26,22 @@
 // \file
 // Representation of the station beam former.
 
-#include "Element.h"
-#include "AntennaModel.h"
+#include "ElementResponse.h"
+#include "Antenna.h"
+#include "BeamFormer.h"
 #include "Types.h"
 
 #include <memory>
 #include <vector>
 
+namespace LOFAR {
 namespace StationResponse
 {
 
 // \addtogroup StationResponse
 // @{
 
-class Station : public Element
+class Station
 {
 public:
     typedef std::shared_ptr<Station>             Ptr;
@@ -55,9 +57,9 @@ public:
     Station(
         const std::string &name,
         const vector3r_t &position,
-        const AntennaModelID model);
+        const ElementResponseModel model);
 
-    void setModel(const AntennaModelID model);
+    void setModel(const ElementResponseModel model);
 
     /*!
      *  \brief Return the name of the station.
@@ -159,13 +161,6 @@ public:
     matrix22c_t response(real_t time, real_t freq, const vector3r_t &direction,
         real_t freq0, const vector3r_t &station0, const vector3r_t &tile0, const bool rotate = true)
         const;
-
-    virtual void response(
-        double time,
-        double freq,
-        double theta,
-        double phi,
-        std::complex<double> (&response)[2][2]) const {}
 
     /*!
      *  \brief Compute the array factor of the station for a plane wave of
@@ -307,20 +302,73 @@ public:
 
     // @}
 
-    const AntennaModel::Ptr get_antenna_model() {return itsAntennaModel;}
+    // ===================================================================
+    // New methods introduced in refactor
+    // ==================================================================
+    /**
+     *  \brief Station coordinate system.
+     *
+     *  A right handed, cartesian, local coordinate system with coordinate axes
+     *  \p p, \p q, and \p r is associated with each antenna field.
+     *
+     *  The r-axis is orthogonal to the antenna field, and points towards the
+     *  local pseudo zenith.
+     *
+     *  The q-axis is the northern bisector of the \p X and \p Y dipoles, i.e.
+     *  it is the reference direction from which the orientation of the dual
+     *  dipole antennae is determined. The q-axis points towards the North at
+     *  the core. At remote sites it is defined as the intersection of the
+     *  antenna field plane and a plane parallel to the meridian plane at the
+     *  core. This ensures the reference directions at all sites are similar.
+     *
+     *  The p-axis is orthogonal to both other axes, and points towards the East
+     *  at the core.
+     *
+     *  The axes and origin of the anntena field coordinate system are expressed
+     *  as vectors in the geocentric, cartesian, ITRF coordinate system, in
+     *  meters.
+     *
+     *  \sa "LOFAR Reference Plane and Reference Direction", M.A. Brentjens,
+     *  LOFAR-ASTRON-MEM-248.
+     */
+    struct CoordinateSystem
+    {
+        struct Axes
+        {
+            vector3r_t  p;
+            vector3r_t  q;
+            vector3r_t  r;
+        };
 
-private:
-//     raw_array_factor_t fieldArrayFactor(const AntennaField::ConstPtr &field,
-//         real_t time, real_t freq, const vector3r_t &direction, real_t freq0,
-//         const vector3r_t &position0, const vector3r_t &direction0) const;
+        vector3r_t  origin;
+        Axes        axes;
+    };
+
+
+    const ElementResponse::Ptr get_element_response() {return itsElementResponse;}
+
+    matrix22c_t elementResponse(real_t time, real_t freq,
+        const vector3r_t &direction, const bool rotate = true) const;
+
+    matrix22c_t response(
+        real_t time,
+        real_t freq,
+        const vector3r_t &direction) const
+    {
+        return itsAntenna->response(time, freq, direction);
+    }
+
+    void set_antenna(Antenna::Ptr antenna) {itsAntenna = antenna;}
 
 private:
     std::string itsName;
     vector3r_t  itsPosition;
     vector3r_t  itsPhaseReference;
-//     FieldList   itsFields;
-    AntennaModelID itsAntennaModelID = AntennaModelID::Unknown;
-    AntennaModel::Ptr itsAntennaModel;
+    ElementResponseModel itsElementResponseModel = ElementResponseModel::Unknown;
+    ElementResponse::Ptr itsElementResponse;
+    Element::Ptr itsElement;
+
+    Antenna::Ptr itsAntenna;
 };
 
 // @}
@@ -378,5 +426,6 @@ void Station::arrayFactor(unsigned int count, real_t time, T freq,
 }
 
 } //# namespace StationResponse
+} // namespace LOFAR
 
 #endif

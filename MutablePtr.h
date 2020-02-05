@@ -25,6 +25,7 @@
 
 #include <memory>
 
+namespace LOFAR {
 namespace StationResponse
 {
 
@@ -78,10 +79,11 @@ class MutablePtr : public std::shared_ptr<std::shared_ptr<T>> {
 public:
     MutablePtr(std::shared_ptr<T> ptr) : std::shared_ptr<std::shared_ptr<T>>(new std::shared_ptr<T>(ptr)) {}
     T& operator*() const { return **(this->get()); }
-    T* operator->() const { return *(this->get()); }
+    std::shared_ptr<T> operator->() const { return *(this->get()); }
     void set(std::shared_ptr<T> ptr) { *(this->get()) = ptr;}
 };
 
 } //# namespace StationResponse
+} // namespace LOFAR
 
 #endif

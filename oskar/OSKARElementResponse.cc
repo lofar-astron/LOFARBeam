@@ -1,19 +1,10 @@
 #include "OSKARElementResponse.h"
-
-#include "oskar_vector_types.h"
-#include "oskar_helper.h"
+#include "oskar.h"
 
 #include <iostream>
 
+namespace LOFAR {
 namespace StationResponse{
-
-void oskar_evaluate_dipole_pattern_double(
-    const int num_points,
-    const double* theta,
-    const double* phi,
-    const double freq_hz,
-    const double dipole_length_m,
-    std::complex<double>* pattern);
 
 void OSKARElementResponseDipole::response(
     double freq,
@@ -30,4 +21,5 @@ void OSKARElementResponseDipole::response(
     oskar_evaluate_dipole_pattern_double(1, &theta, &phi_y, freq, dipole_length_m, response_ptr + 2);
 }
 
-}
+} // namespace StationResponse
+} // namespace LOFAR

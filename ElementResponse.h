@@ -1,28 +1,28 @@
-#ifndef ANTENNAMODEL_H
-#define ANTENNAMODEL_H
+#ifndef ELEMENTRESPONSE_H
+#define ELEMENTRESPONSE_H
 
 #include <complex>
 #include <ostream>
 
 #include "MutablePtr.h"
 
-namespace StationResponse
-{
+namespace LOFAR {
+namespace StationResponse {
 
-enum AntennaModelID {
+enum ElementResponseModel {
     Unknown,
     Hamaker,
     LOBES,
     OSKAR
 };
 
-std::ostream& operator<<(std::ostream& os, AntennaModelID model);
+std::ostream& operator<<(std::ostream& os, ElementResponseModel model);
 
-class AntennaModel
+class ElementResponse
 {
 public:
 
-    typedef MutablePtr<AntennaModel> Ptr;
+    typedef MutablePtr<ElementResponse> Ptr;
 
     virtual void response(
         double freq,
@@ -43,5 +43,6 @@ public:
 };
 
 } // namespace StationResponse
+} // namespace LOFAR
 
 #endif
