@@ -26,15 +26,15 @@
 // \file
 // Representation of the station beam former.
 
-#include "AntennaField.h"
+#include "ElementResponse.h"
+#include "Antenna.h"
+#include "BeamFormer.h"
 #include "Types.h"
-#include "ElementResponseModel.h"
 
 #include <memory>
 #include <vector>
 
-namespace LOFAR
-{
+namespace LOFAR {
 namespace StationResponse
 {
 
@@ -46,7 +46,7 @@ class Station
 public:
     typedef std::shared_ptr<Station>             Ptr;
     typedef std::shared_ptr<const Station>       ConstPtr;
-    typedef std::vector<AntennaField::ConstPtr>  FieldList;
+//     typedef std::vector<AntennaField::ConstPtr>  FieldList;
 
     /*!
      *  \brief Construct a new Station instance.
@@ -55,14 +55,16 @@ public:
      *  \param position Position of the station (ITRF, m).
      */
     Station(
-        const string &name,
+        const std::string &name,
         const vector3r_t &position,
         const ElementResponseModel model);
+
+    void setModel(const ElementResponseModel model);
 
     /*!
      *  \brief Return the name of the station.
      */
-    const string &name() const;
+    const std::string &name() const;
 
     /*!
      *  \brief Return the position of the station (ITRF, m).
@@ -98,7 +100,7 @@ public:
      *
      *  Use this method to add the appropriate antenna fields to the station.
      */
-    void addField(const AntennaField::ConstPtr &field);
+//     void addField(const AntennaField::ConstPtr &field);
 
 
     /*!
@@ -113,19 +115,19 @@ public:
      *  \return An AntennaField::ConstPtr to the requested AntennaField
      *  instance, or an empty AntennaField::ConstPtr if \p i is out of bounds.
      */
-    AntennaField::ConstPtr field(size_t i) const;
+//     AntennaField::ConstPtr field(size_t i) const;
 
     /*!
      *  \brief Return an iterator that points to the beginning of the list of
      *  antenna fields.
      */
-    FieldList::const_iterator beginFields() const;
+//     FieldList::const_iterator beginFields() const;
 
     /*!
      *  \brief Return an iterator that points to the end of the list of antenna
      *  fields.
      */
-    FieldList::const_iterator endFields() const;
+//     FieldList::const_iterator endFields() const;
 
     /*!
      *  \brief Compute the response of the station for a plane wave of frequency
@@ -300,17 +302,73 @@ public:
 
     // @}
 
-private:
-    raw_array_factor_t fieldArrayFactor(const AntennaField::ConstPtr &field,
-        real_t time, real_t freq, const vector3r_t &direction, real_t freq0,
-        const vector3r_t &position0, const vector3r_t &direction0) const;
+    // ===================================================================
+    // New methods introduced in refactor
+    // ==================================================================
+    /**
+     *  \brief Station coordinate system.
+     *
+     *  A right handed, cartesian, local coordinate system with coordinate axes
+     *  \p p, \p q, and \p r is associated with each antenna field.
+     *
+     *  The r-axis is orthogonal to the antenna field, and points towards the
+     *  local pseudo zenith.
+     *
+     *  The q-axis is the northern bisector of the \p X and \p Y dipoles, i.e.
+     *  it is the reference direction from which the orientation of the dual
+     *  dipole antennae is determined. The q-axis points towards the North at
+     *  the core. At remote sites it is defined as the intersection of the
+     *  antenna field plane and a plane parallel to the meridian plane at the
+     *  core. This ensures the reference directions at all sites are similar.
+     *
+     *  The p-axis is orthogonal to both other axes, and points towards the East
+     *  at the core.
+     *
+     *  The axes and origin of the anntena field coordinate system are expressed
+     *  as vectors in the geocentric, cartesian, ITRF coordinate system, in
+     *  meters.
+     *
+     *  \sa "LOFAR Reference Plane and Reference Direction", M.A. Brentjens,
+     *  LOFAR-ASTRON-MEM-248.
+     */
+    struct CoordinateSystem
+    {
+        struct Axes
+        {
+            vector3r_t  p;
+            vector3r_t  q;
+            vector3r_t  r;
+        };
+
+        vector3r_t  origin;
+        Axes        axes;
+    };
+
+
+    const ElementResponse::Ptr get_element_response() {return itsElementResponse;}
+
+    matrix22c_t elementResponse(real_t time, real_t freq,
+        const vector3r_t &direction, const bool rotate = true) const;
+
+    matrix22c_t response(
+        real_t time,
+        real_t freq,
+        const vector3r_t &direction) const
+    {
+        return itsAntenna->response(time, freq, direction);
+    }
+
+    void set_antenna(Antenna::Ptr antenna) {itsAntenna = antenna;}
 
 private:
-    string      itsName;
+    std::string itsName;
     vector3r_t  itsPosition;
     vector3r_t  itsPhaseReference;
-    FieldList   itsFields;
-    ElementResponseModel itsModel = ElementResponseModel::Unknown;
+    ElementResponseModel itsElementResponseModel = ElementResponseModel::Unknown;
+    ElementResponse::Ptr itsElementResponse;
+    Element::Ptr itsElement;
+
+    Antenna::Ptr itsAntenna;
 };
 
 // @}
@@ -368,6 +426,6 @@ void Station::arrayFactor(unsigned int count, real_t time, T freq,
 }
 
 } //# namespace StationResponse
-} //# namespace LOFAR
+} // namespace LOFAR
 
 #endif

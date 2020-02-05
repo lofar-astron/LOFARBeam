@@ -24,61 +24,42 @@
 #include "MathUtil.h"
 
 #include "hamaker/HamakerElementResponse.h"
-#include "oskar/OskarElementResponse.h"
-#include "DualDipoleAntenna.h"
-#include "TileAntenna.h"
+#include "oskar/OSKARElementResponse.h"
+#include "lobes/LOBESElementResponse.h"
+// #include "DualDipoleAntenna.h"
+// #include "TileAntenna.h"
 
-namespace LOFAR
-{
+namespace LOFAR {
 namespace StationResponse
 {
 
 Station::Station(
-    const string &name,
+    const std::string &name,
     const vector3r_t &position,
     const ElementResponseModel model)
     :   itsName(name),
         itsPosition(position),
-        itsPhaseReference(position)
+        itsPhaseReference(position),
+        itsElementResponse(nullptr)
 {
-    if (itsModel != ElementResponseModel::Unknown &&
-        itsModel != model)
-    {
-        throw std::runtime_error("Every station must have the same element response model.");
-    } else {
-        itsModel = model;
-    }
+    setModel(model);
+}
 
+void Station::setModel(const ElementResponseModel model)
+{
     switch (model)
     {
         case Hamaker:
-            if (DualDipoleAntenna::itsElementResponse == nullptr) {
-                DualDipoleAntenna::itsElementResponse.reset(new HamakerElementResponseLBA);
-            }
-            if (TileAntenna::itsElementResponse == nullptr) {
-                TileAntenna::itsElementResponse.reset(new HamakerElementResponseHBA);
-            }
+            itsElementResponse.set(HamakerElementResponse::getInstance(itsName));
             break;
-        case OSKAR:
-        #if 0
-            DualDipoleAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
-            TileAntenna::itsElementResponse.reset(new OSKARElementResponseDipole());
-        #else
-            if (DualDipoleAntenna::itsElementResponse == nullptr ||
-                TileAntenna::itsElementResponse == nullptr)
-            {
-                #if 0
-                // TODO: this should work, but causes memory corruption
-                ElementResponse* elementResponseModel = new OskarElementResponseSphericalWave();
-                DualDipoleAntenna::itsElementResponse.reset(elementResponseModel);
-                TileAntenna::itsElementResponse.reset(elementResponseModel);
-                #else
-                // TODO: for now, just create the same model twice
-                DualDipoleAntenna::itsElementResponse.reset(new OskarElementResponseSphericalWave());
-                TileAntenna::itsElementResponse.reset(new OskarElementResponseSphericalWave());
-                #endif
-            }
-        #endif
+        case OSKARDipole:
+            itsElementResponse.set(OSKARElementResponseDipole::getInstance());
+            break;
+        case OSKARSphericalWave:
+            itsElementResponse.set(OSKARElementResponseSphericalWave::getInstance());
+            break;
+        case LOBES:
+            itsElementResponse.set(LOBESElementResponse::getInstance(itsName));
             break;
         default:
             std::stringstream message;
@@ -88,7 +69,7 @@ Station::Station(
     }
 }
 
-const string &Station::name() const
+const std::string &Station::name() const
 {
     return itsName;
 }
@@ -108,121 +89,41 @@ const vector3r_t &Station::phaseReference() const
     return itsPhaseReference;
 }
 
-void Station::addField(const AntennaField::ConstPtr &field)
-{
-    itsFields.push_back(field);
-}
+// ========================================================
 
-size_t Station::nFields() const
+matrix22c_t Station::elementResponse(real_t time, real_t freq,
+    const vector3r_t &direction, const bool rotate) const
 {
-    return itsFields.size();
-}
-
-AntennaField::ConstPtr Station::field(size_t i) const
-{
-    return (i < itsFields.size() ? itsFields[i] : AntennaField::ConstPtr());
-}
-
-Station::FieldList::const_iterator Station::beginFields() const
-{
-    return itsFields.begin();
-}
-
-Station::FieldList::const_iterator Station::endFields() const
-{
-    return itsFields.end();
+    // TODO
+//   if (rotate)
+//     return itsAntenna->response(freq, itrf2field(direction))
+//         * rotation(time, direction);
+//   else
+//     return itsAntenna->response(freq, itrf2field(direction));
+//     return itsElementResponse->response(freq, direction);
 }
 
 matrix22c_t Station::response(real_t time, real_t freq,
     const vector3r_t &direction, real_t freq0, const vector3r_t &station0,
     const vector3r_t &tile0, const bool rotate) const
 {
-    raw_response_t result = {{{{{}}, {{}}}}, {{}}};
-    for(FieldList::const_iterator field_it = beginFields(),
-        field_end = endFields(); field_it != field_end; ++field_it)
-    {
-        raw_array_factor_t field = fieldArrayFactor(*field_it, time, freq,
-            direction, freq0, phaseReference(), station0);
-
-        raw_response_t antenna = (*field_it)->rawResponse(time, freq,
-            direction, tile0, rotate);
-
-        result.response[0][0] += field.factor[0] * antenna.response[0][0];
-        result.response[0][1] += field.factor[0] * antenna.response[0][1];
-        result.response[1][0] += field.factor[1] * antenna.response[1][0];
-        result.response[1][1] += field.factor[1] * antenna.response[1][1];
-
-        result.weight[0] += field.weight[0] * antenna.weight[0];
-        result.weight[1] += field.weight[1] * antenna.weight[1];
-    }
-
-    return normalize(result);
+    Antenna::Options options = {
+        .freq0 = freq0,
+        .station0 = &station0,
+        .tile0 = &tile0};
+    return itsAntenna->response(time, freq, direction);
 }
 
 diag22c_t Station::arrayFactor(real_t time, real_t freq,
     const vector3r_t &direction, real_t freq0, const vector3r_t &station0,
     const vector3r_t &tile0) const
 {
-    raw_array_factor_t af = {{{}}, {{}}};
-    for(FieldList::const_iterator field_it = beginFields(),
-        field_end = endFields(); field_it != field_end; ++field_it)
-    {
-        raw_array_factor_t field = fieldArrayFactor(*field_it, time, freq,
-            direction, freq0, phaseReference(), station0);
-
-        raw_array_factor_t antenna = (*field_it)->rawArrayFactor(time, freq,
-            direction, tile0);
-
-        af.factor[0] += field.factor[0] * antenna.factor[0];
-        af.factor[1] += field.factor[1] * antenna.factor[1];
-        af.weight[0] += field.weight[0] * antenna.weight[0];
-        af.weight[1] += field.weight[1] * antenna.weight[1];
-    }
-
-    return normalize(af);
-}
-
-raw_array_factor_t
-Station::fieldArrayFactor(const AntennaField::ConstPtr &field,
-    real_t, real_t freq, const vector3r_t &direction, real_t freq0,
-    const vector3r_t &position0, const vector3r_t &direction0) const
-{
-    real_t k = Constants::_2pi * freq / Constants::c;
-    real_t k0 = Constants::_2pi * freq0 / Constants::c;
-
-    vector3r_t offset = field->position() - position0;
-
-    raw_array_factor_t af = {{{}}, {{}}};
-    typedef AntennaField::AntennaList AntennaList;
-    for(AntennaList::const_iterator antenna_it = field->beginAntennae(),
-        antenna_end = field->endAntennae(); antenna_it != antenna_end;
-        ++antenna_it)
-    {
-        if(!antenna_it->enabled[0] && !antenna_it->enabled[1])
-        {
-            continue;
-        }
-
-        vector3r_t position = offset + antenna_it->position;
-        real_t phase = k * dot(position, direction) - k0 * dot(position,
-            direction0);
-        complex_t shift = complex_t(cos(phase), sin(phase));
-
-        if(antenna_it->enabled[0])
-        {
-            af.factor[0] += shift;
-            ++af.weight[0];
-        }
-
-        if(antenna_it->enabled[1])
-        {
-            af.factor[1] += shift;
-            ++af.weight[1];
-        }
-    }
-
-    return af;
+    Antenna::Options options = {
+        .freq0 = freq0,
+        .station0 = &station0,
+        .tile0 = &tile0};
+    return itsAntenna->arrayFactor(time, freq, direction);
 }
 
 } //# namespace StationResponse
-} //# namespace LOFAR
+} // namespace LOFAR

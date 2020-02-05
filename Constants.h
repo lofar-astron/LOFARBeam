@@ -28,8 +28,7 @@
 
 #include "Types.h"
 
-namespace LOFAR
-{
+namespace LOFAR {
 namespace StationResponse
 {
 
@@ -55,6 +54,6 @@ const real_t c = 2.99792458e+08;
 // @}
 
 } //# namespace StationResponse
-} //# namespace LOFAR
+} // namespace LOFAR
 
 #endif

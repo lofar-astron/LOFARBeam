@@ -29,8 +29,7 @@
 #include "Constants.h"
 #include "Types.h"
 
-namespace LOFAR
-{
+namespace LOFAR {
 namespace StationResponse
 {
 
@@ -166,6 +165,6 @@ inline diag22c_t normalize(const raw_array_factor_t &raw)
 // @}
 
 } //# namespace StationResponse
-} //# namespace LOFAR
+} // namespace LOFAR
 
 #endif

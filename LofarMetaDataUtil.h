@@ -29,16 +29,14 @@
 // LOFAR observations stored in MS format.
 
 #include "Station.h"
-#include "ElementResponseModel.h"
+#include "ElementResponse.h"
 
 #include <casacore/ms/MeasurementSets/MeasurementSet.h>
 #include <casacore/ms/MeasurementSets/MSAntennaColumns.h>
 #include <casacore/measures/Measures/MDirection.h>
 
-namespace LOFAR
-{
-namespace StationResponse
-{
+namespace LOFAR {
+namespace StationResponse {
 
 // \addtogroup StationResponse
 // @{
@@ -70,6 +68,6 @@ casacore::MDirection readTileBeamDirection(const casacore::MeasurementSet &ms);
 // @}
 
 } //# namespace StationResponse
-} //# namespace LOFAR
+} // namespace LOFAR
 
 #endif

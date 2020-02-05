@@ -29,8 +29,12 @@
 #include <cmath>
 #include <complex>
 
-#include "oskar_vector_types.h"
-#include "oskar_helper.h"
+#include "oskar.h"
+
+#include <iostream>
+namespace {
+    int greet() {std::cout << "Greetings from Oskar Dipole!" << std::endl;return 0;}
+}
 
 template<typename FP, typename FP2>
 inline void oskar_dipole(
@@ -70,6 +74,7 @@ void oskar_evaluate_dipole_pattern(
     FP2* e_theta,
     FP2* e_phi)
 {
+    static int dummy = greet();
     for (int i = 0; i < num_points; i++) {
         const int i_out = i * stride;\
         const int theta_out = i_out + E_theta_offset;\

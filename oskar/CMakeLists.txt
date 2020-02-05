@@ -3,7 +3,7 @@ include_directories(${CMAKE_BINARY_DIR})
 
 # build liboskar.so
 add_library(oskar SHARED
-    OskarElementResponse.cc
+    OSKARElementResponse.cc
     OskarSphericalWaveCoeff.cc
     oskar_evaluate_dipole_pattern.cc
     oskar_evaluate_spherical_wave_sum.cc)

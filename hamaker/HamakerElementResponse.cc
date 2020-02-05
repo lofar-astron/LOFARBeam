@@ -2,12 +2,33 @@
 //# Functions to compute the (idealized) response of a LOFAR
 //# LBA or HBA dual dipole antenna.
 
+
+#include<stdexcept>
+
 #include "config.h"
 
 #include "HamakerElementResponse.h"
+#include "../Singleton.h"
+
+namespace LOFAR {
+namespace StationResponse {
 
 // PI / 2.0
 const double pi_2 = 1.570796326794896619231322;
+
+std::shared_ptr<HamakerElementResponse> HamakerElementResponse::getInstance(const std::string &name)
+{
+    if (name.length() >= 3) {
+        if (name.substr(name.length()-3, 3) == "LBA") {
+            return Singleton<HamakerElementResponseLBA>::getInstance();
+        }
+        if (name.substr(name.length()-3, 3) == "HBA") {
+            return Singleton<HamakerElementResponseHBA>::getInstance();
+        }
+    }
+    throw std::invalid_argument("HamakerElementResponse::getInstance: name should end in either 'LBA' or 'HBA'");
+}
+
 
 std::string HamakerElementResponse::get_path(
     const char* filename) const
@@ -18,7 +39,7 @@ std::string HamakerElementResponse::get_path(
     return ss.str();
 }
 
-void HamakerElementResponse::element_response(
+void HamakerElementResponse::response(
     double freq,
     double theta,
     double phi,
@@ -117,3 +138,6 @@ HamakerElementResponseLBA::HamakerElementResponseLBA()
     std::string path = get_path("HamakerLBACoeff.h5");
     m_coeffs.reset(new HamakerCoefficients(path));
 }
+
+} // namespace StationResponse
+} // namespace LOFAR

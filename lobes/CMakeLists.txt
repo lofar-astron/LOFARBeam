@@ -2,7 +2,11 @@ find_package(pybind11 REQUIRED)
 find_package (Eigen3 REQUIRED NO_MODULE)
 find_package(HDF5 COMPONENTS C CXX REQUIRED)
 
-pybind11_add_module(lobes lobes.cc ElementResponse.cc)
+# pybind11_add_module(pylobes SHARED lobes.cc ElementResponse.cc LOBESElementResponse.cc)
+# target_link_libraries (pylobes PUBLIC Eigen3::Eigen ${HDF5_LIBRARIES})
+
+add_library(lobes SHARED LOBESElementResponse.cc)
+install(TARGETS lobes)
 
 configure_file(test.py test.py COPYONLY)
 
@@ -17,5 +21,4 @@ configure_file(CS302_coords.mat CS302_coords.mat COPYONLY)
 # configure_file(LBA_CS302_fine.mat LBA_CS302_fine.mat COPYONLY)
 
 
-target_link_libraries (lobes PRIVATE Eigen3::Eigen ${HDF5_LIBRARIES})
 
