@@ -10,6 +10,8 @@ include_directories(${CASACORE_INCLUDE_DIR})
 
 add_compile_options(-std=c++11 -Wall -DNDEBUG -Wl,--no-undefined)
 
+option (BUILD_PYTHON "Build the python bindings" YES)
+
 add_library(stationresponse SHARED
   AntennaField.cc
   AntennaFieldHBA.cc
@@ -80,7 +82,7 @@ if (BUILD_PYTHON)
     set(oldboostpy "3")
   endif()
   set(boostpy ${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-  message("trying boostpy=${boostpy}")
+  message(STATUS "Trying to find boost-python libraries with version suffix ${boostpy}")
   find_package(Boost 1.67.0 COMPONENTS python${boostpy} numpy${boostpy})
   if(NOT Boost_FOUND)
     message(STATUS "Falling back to old Boost search.")
