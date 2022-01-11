@@ -1,0 +1,23 @@
+name: LOFARBeam Ubuntu CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+    build-1804:
+            runs-on: ubuntu-latest:
+            steps:
+                    - uses: actions/checkout@v2
+                    - name: Build on 18 04
+                      run: |
+                         docker build -f Dockerfiles/ubuntu-18.04 .
+    build-2004:
+            runs-on: ubuntu-latest:
+            steps:
+                    - uses: actions/checkout@v2
+                    - name: Build on 20 04
+                      run: |
+                         docker build -f Dockerfiles/ubuntu-20.04 .
