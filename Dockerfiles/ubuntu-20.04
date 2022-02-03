@@ -1,6 +1,7 @@
 FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_PRIORITY critical
 
 RUN apt-get update
 RUN apt-get install -y libboost-all-dev \
@@ -10,7 +11,6 @@ RUN apt-get install -y libboost-all-dev \
                        python3-numpy \
 		               gfortran \
 		               wget \
-                       libmysofa-dev \
                        flex \
                        bison \
                        libbison-dev \
@@ -20,10 +20,21 @@ RUN apt-get install -y libboost-all-dev \
                        wcslib-dev \
                        cmake 
 
+########################################
+# build SOFA
+########################################
+WORKDIR /src
+RUN wget http://www.iausofa.org/2021_0512_C/sofa_c-20210512.tar.gz
+RUN tar xvfz sofa_c-20210512.tar.gz
+WORKDIR /src/sofa/20210512/c/src
+RUN sed -i '52s/.*/INSTALL_DIR = \/usr/' makefile
+RUN make -j4
+RUN make install
+RUN make test
+
 #####################################################################
 ## BUILD CASACORE FROM SOURCE
 #####################################################################
-RUN mkdir /src
 WORKDIR /src
 RUN wget https://github.com/casacore/casacore/archive/v3.1.1.tar.gz
 RUN tar xvf v3.1.1.tar.gz
@@ -51,8 +62,5 @@ ADD . /src
 WORKDIR /src
 RUN mkdir build
 RUN cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=$(which python3) ../ && make -j16 && make install
-RUN touch "/usr/lib/python3.8/site-packages/lofar/__init__.py"
-# installs in the site-packages for some reason, need to add this to the search path
-ENV PYTHONPATH "/usr/lib/python3.8/site-packages:$PYTHONPATH"
 RUN python3 -c "import lofar.stationresponse as lsr"
 

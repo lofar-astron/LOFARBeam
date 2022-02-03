@@ -49,8 +49,5 @@ ADD . /src
 WORKDIR /src
 RUN mkdir build
 RUN cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=$(which python3) ../ && make -j16 && make install
-RUN touch "/usr/lib/python3.6/site-packages/lofar/__init__.py"
-# installs in the site-packages for some reason, need to add this to the search path
-ENV PYTHONPATH "/usr/lib/python3.6/site-packages:$PYTHONPATH"
 RUN python3 -c "import lofar.stationresponse as lsr"
 

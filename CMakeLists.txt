@@ -67,6 +67,12 @@ elseif(DOXYGEN_FOUND)
 
 endif(DOXYGEN_FOUND)
 
+
+include(cmake/SetPythonPackagesDir.cmake)
+if(NOT PYTHON_INSTALL_DIR )
+    set( PYTHON_INSTALL_DIR "${PYTHON_PACKAGES_DIR}/lofar" )
+endif(NOT PYTHON_INSTALL_DIR )
+
 if (BUILD_PYTHON)
   # This is NOT the modern cmake-included FindPython!
   find_package (Python COMPONENTS Development)
@@ -100,6 +106,9 @@ if (BUILD_PYTHON)
   set_target_properties(_stationresponse PROPERTIES PREFIX "")
   target_include_directories(_stationresponse PRIVATE ${PYTHON_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
   target_link_libraries(_stationresponse stationresponse ${casapylib} Boost::python${boostpy} Boost::numpy${boostpy} ${PYTHON_LIBRARIES})
-  install(TARGETS _stationresponse DESTINATION ${PYTHON_INSTALL_DIR}/lofar/stationresponse)
-  install(FILES __init__.py DESTINATION ${PYTHON_INSTALL_DIR}/lofar/stationresponse)
+  install(TARGETS _stationresponse DESTINATION ${PYTHON_PACKAGES_DIR}/lofar/stationresponse)
+  install(FILES python/lofar/stationresponse/__init__.py DESTINATION ${PYTHON_PACKAGES_DIR}/lofar/stationresponse)
+  if (NOT EXISTS ${PYTHON_PACKAGES_DIR}/lofar/__init__.py)
+    install(FILES python/lofar/__init__.py DESTINATION ${PYTHON_PACKAGES_DIR}/lofar)
+  endif (NOT EXISTS ${PYTHON_PACKAGES_DIR}/lofar/__init__.py)
 endif(BUILD_PYTHON)
