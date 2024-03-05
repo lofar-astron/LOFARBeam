@@ -42,9 +42,11 @@ if(PYTHON_EXECUTABLE)
     RESULT_VARIABLE _pyres
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(NOT _pyres EQUAL 0)
-    message(FATAL_ERROR "${_pyerr}")
+    message(FATAL_ERROR "Python command failed:\n${_pyerr}")
   else()
-    message(WARNING "${_pyerr}")
+    if(_pyerr)
+      message(WARNING "${_pyerr}")
+    endif()
   endif()
   
   if(NOT DEFINED PYTHON_BUILD_DIR)
