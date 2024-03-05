@@ -39,10 +39,13 @@ if(PYTHON_EXECUTABLE)
     COMMAND "${PYTHON_EXECUTABLE}" "-c" "${_cmd}"
     OUTPUT_VARIABLE _pydir
     ERROR_VARIABLE _pyerr
+    RESULT_VARIABLE _pyres
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if(_pyerr)
-    message(FATAL_ERROR "Python command failed:\n${_pyerr}")
-  endif(_pyerr)
+  if(NOT _pyres EQUAL 0)
+    message(FATAL_ERROR "${_pyerr}")
+  else()
+    message(WARNING "${_pyerr}")
+  endif()
   
   if(NOT DEFINED PYTHON_BUILD_DIR)
     set(_PRINT_PYTHON_DIRS TRUE)
